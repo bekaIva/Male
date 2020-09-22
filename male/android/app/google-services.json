@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "206643825076",
+    "firebase_url": "https://male-e6ded.firebaseio.com",
+    "project_id": "male-e6ded",
+    "storage_bucket": "male-e6ded.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:206643825076:android:944f434722ff5a81d04ae1",
+        "android_client_info": {
+          "package_name": "com.bsoft.male"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "206643825076-sb5fccd5p8mi3qtqt292gt4souqvul0f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEhI8sx9YVChHBk-ZPSw-JbSHwZZAqTNI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "206643825076-sb5fccd5p8mi3qtqt292gt4souqvul0f.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

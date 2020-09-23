@@ -43,7 +43,7 @@ class MaleApp extends StatelessWidget {
             ProductPage.id: (context) => ProductPage(),
             SingUpLoginPage.id: (context) => SingUpLoginPage()
           },
-          supportedLocales: [Locale('ka', 'GE'), Locale('en', 'US')],
+          supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: [
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
@@ -61,7 +61,7 @@ class MaleApp extends StatelessWidget {
             }
             return supportedLocales.first;
           },
-          title: 'Martivi',
+          title: 'Male',
           theme: ThemeData(
             appBarTheme: AppBarTheme(color: kPrimary),
             primarySwatch: Colors.blue,

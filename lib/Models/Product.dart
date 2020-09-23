@@ -27,6 +27,7 @@ class Product {
   List<FirestoreImage> images;
   int quantityInSupply;
   double basePrice;
+  int order;
   int quantity;
   Product(
       {this.localizedDescription,
@@ -34,9 +35,11 @@ class Product {
       this.addonDescriptions,
       this.selectableAddons,
       this.checkableAddons,
-      this.images});
+      this.images,
+      this.order});
   Map<String, dynamic> toJson() {
     return {
+      'order': order,
       'documentId': documentId,
       'productDocumentId': productDocumentId,
       'localizedName': localizedName,
@@ -68,6 +71,7 @@ class Product {
   }
 
   Product.fromJson(Map<String, dynamic> json) {
+    order = (json['order'] as num)?.toInt();
     productDocumentId = json['productDocumentId'] as String;
     quantityInSupply = (json['quantityInSupply'] as num)?.toInt();
     basePrice = (json['basePrice'] as num)?.toDouble();

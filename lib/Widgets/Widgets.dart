@@ -815,11 +815,11 @@ class CartControl extends StatelessWidget {
                       orElse: () => null);
                   return inCartProduct == null
                       ? FlatButton(
+                          color: kPrimary,
                           child: Text(
                             AppLocalizations.of(context)
                                 .translate('Add to cart'),
-                            style:
-                                TextStyle(color: Colors.black.withOpacity(.8)),
+                            style: TextStyle(color: Colors.white),
                           ),
                           onPressed: () {
                             product.quantity = 1;

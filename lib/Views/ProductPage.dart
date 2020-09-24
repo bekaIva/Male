@@ -198,7 +198,13 @@ class _ProductPageState extends State<ProductPage> {
                                 try {
                                   var p = Product.fromJson(element.data());
                                   p.productDocumentId = element.id;
-                                  value.add(p);
+                                  if (user.role == UserType.user) {
+                                    if (p.quantityInSupply != 0) {
+                                      value.add(p);
+                                    }
+                                  } else {
+                                    value.add(p);
+                                  }
                                 } catch (e) {
                                   print(e.toString());
                                 }

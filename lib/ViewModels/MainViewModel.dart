@@ -88,8 +88,8 @@ class MainViewModel extends ChangeNotifier {
   }
 
   StreamSubscription<QuerySnapshot> databaseUserListener;
-  StreamSubscription<QuerySnapshot> categoryListener;
   StreamSubscription<QuerySnapshot> cartListener;
+  StreamSubscription<QuerySnapshot> categoryListener;
   StreamSubscription<QuerySnapshot> productListener;
   StreamSubscription<QuerySnapshot> chatListener;
   StreamSubscription<QuerySnapshot> usersListener;
@@ -122,6 +122,21 @@ class MainViewModel extends ChangeNotifier {
         });
 
         categoryListener?.cancel();
+        categoryListener = FirebaseFirestore.instance
+            .collection('/categories')
+            .orderBy('order')
+            .snapshots()
+            .listen((event) {
+          List<Category> cs = [];
+          event.docs.forEach((element) {
+            var c = Category.fromJson(element.data());
+            c.documentId = element.id;
+            cs.add(c);
+          });
+          categories.value = cs;
+        });
+
+        productListener?.cancel();
         categoryListener = FirebaseFirestore.instance
             .collection('/categories')
             .orderBy('order')
@@ -295,6 +310,10 @@ class MainViewModel extends ChangeNotifier {
   Future storeProduct(
     Product p,
   ) async {
+    await FirebaseFirestore.instance
+        .collection('productsCounter')
+        .doc('counter')
+        .set({'count': FieldValue.increment(1)}, SetOptions(merge: true));
     await FirebaseFirestore.instance
         .collection('/products')
         .doc(p.productDocumentId)

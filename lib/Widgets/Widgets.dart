@@ -816,10 +816,14 @@ class CartControl extends StatelessWidget {
                   return inCartProduct == null
                       ? FlatButton(
                           color: kPrimary,
-                          child: Text(
-                            AppLocalizations.of(context)
-                                .translate('Add to cart'),
-                            style: TextStyle(color: Colors.white),
+                          child: Padding(
+                            padding: const EdgeInsets.all(2.0),
+                            child: Text(
+                              AppLocalizations.of(context)
+                                  .translate('Add to cart'),
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Colors.white),
+                            ),
                           ),
                           onPressed: () {
                             product.quantity = 1;

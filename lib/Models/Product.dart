@@ -5,18 +5,20 @@ import 'package:male/Localizations/app_localizations.dart';
 import 'FirestoreImage.dart';
 
 class Product {
-  double get totalProductPrice =>
-      (this.basePrice ?? 0) +
-      (selectableAddons?.where((element) => element.isSelected)?.fold<double>(
-              0.0,
-              (previousValue, element) =>
-                  previousValue + (element?.price ?? 0.0)) ??
-          0) +
-      (checkableAddons?.where((element) => element.isSelected)?.fold(
-              0,
-              (previousValue, element) =>
-                  previousValue + (element?.price ?? 0)) ??
-          0);
+  double get totalProductPrice => double.parse(((this.basePrice ?? 0) +
+          (selectableAddons
+                  ?.where((element) => element.isSelected)
+                  ?.fold<double>(
+                      0.0,
+                      (previousValue, element) =>
+                          previousValue + (element?.price ?? 0.0)) ??
+              0) +
+          (checkableAddons?.where((element) => element.isSelected)?.fold(
+                  0,
+                  (previousValue, element) =>
+                      previousValue + (element?.price ?? 0)) ??
+              0))
+      .toStringAsFixed(2));
   String documentId;
   String productDocumentId;
   Map<String, String> localizedName;

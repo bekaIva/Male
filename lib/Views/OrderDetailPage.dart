@@ -124,7 +124,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                             children: [
                               Expanded(
                                 child: Text(
-                                  '${order.products.fold(0, (previousValue, element) => previousValue+(element.quantity??1))} ${AppLocalizations.of(context).translate('Product')} | ₾${order.products.fold(0, (previousValue, element) => previousValue + element.totalProductPrice*(element.quantity??1))}',style: TextStyle(fontFamily: 'Sans'),),
+                                  '${order.products.fold(0, (previousValue, element) => previousValue+(element.quantity??1))} ${AppLocalizations.of(context).translate('Product')} | ₾${order.products.fold<double>(0, (previousValue, element) => previousValue + element.totalProductPrice*(element.quantity??1)).toStringAsFixed(2)}',style: TextStyle(fontFamily: 'Sans'),),
                               ),
                             ],
                           ),

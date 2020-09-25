@@ -5,7 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image/image.dart' as Img;
 import 'package:image_picker/image_picker.dart';
 import 'package:male/Constants/Constants.dart';
@@ -49,7 +49,6 @@ class _ProductPageState extends State<ProductPage> {
 
   @override
   Widget build(BuildContext context) {
-    List<Product> products = [];
     return Consumer<MainViewModel>(
       builder: (BuildContext context, MainViewModel viewModel, Widget child) {
         return Scaffold(
@@ -65,7 +64,8 @@ class _ProductPageState extends State<ProductPage> {
                 onPressed: () {
                   showSearch(
                       context: context,
-                      delegate: ProductsSearch(products: products));
+                      delegate:
+                          ProductsSearch(products: viewModel.products.value));
                 },
               ),
               ValueListenableBuilder<List<CartItem>>(
@@ -143,355 +143,392 @@ class _ProductPageState extends State<ProductPage> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: <Widget>[
                         Expanded(
-                            child: StreamBuilder<QuerySnapshot>(
-                          stream: FirebaseFirestore.instance
-                              .collection('/products')
-                              .where('documentId',
-                                  isEqualTo: widget.category.documentId)
-                              .snapshots(),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting)
-                              return Center(
-                                child: CircularProgressIndicator(
-                                  valueColor: AlwaysStoppedAnimation(kPrimary),
-                                ),
-                              );
-                            if (snapshot.data == null) return Text('No Data');
-
-                            if (snapshot.data.docs.length == 0)
-                              return Stack(
-                                children: [
-                                  Container(
-                                      constraints: BoxConstraints.expand(),
-                                      child: SvgPicture.asset(
-                                          'assets/svg/NoItem.svg')),
-                                  Padding(
-                                    padding: EdgeInsets.only(
-                                        bottom:
-                                            MediaQuery.of(context).size.height /
+                          child: ValueListenableBuilder<ConnectionState>(
+                            valueListenable: viewModel.productConnectionState,
+                            builder: (context, connectionState, child) {
+                              if (connectionState == ConnectionState.waiting)
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    valueColor:
+                                        AlwaysStoppedAnimation(kPrimary),
+                                  ),
+                                );
+                              return child;
+                            },
+                            child: ValueListenableBuilder<List<Product>>(
+                              valueListenable: viewModel.products,
+                              builder: (context, val, child) {
+                                List<Product> products = val
+                                    .where((element) =>
+                                        element.documentId ==
+                                        widget.category.documentId)
+                                    .toList();
+                                if (products.length == 0)
+                                  return Stack(
+                                    children: [
+                                      Container(
+                                          constraints: BoxConstraints.expand(),
+                                          child: SvgPicture.asset(
+                                              'assets/svg/NoItem.svg')),
+                                      Padding(
+                                        padding: EdgeInsets.only(
+                                            bottom: MediaQuery.of(context)
+                                                    .size
+                                                    .height /
                                                 4),
-                                    child: Align(
-                                        alignment: Alignment.bottomCenter,
-                                        child: Text(
-                                          AppLocalizations.of(context)
-                                              .translate(
-                                                  'You have nothing here'),
-                                          style: TextStyle(
-                                              fontSize: 16,
-                                              color: kPrimary,
-                                              shadows: [
-                                                BoxShadow(
-                                                    color: Colors.white
-                                                        .withOpacity(1),
-                                                    blurRadius: 10.0,
-                                                    spreadRadius: 2.0)
-                                              ]),
-                                        )),
-                                  )
-                                ],
-                              );
-
-                            List<Product> value = [];
-                            try {
-                              snapshot.data.docs?.forEach((element) {
-                                try {
-                                  var p = Product.fromJson(element.data());
-                                  p.productDocumentId = element.id;
-                                  if (user.role == UserType.user) {
-                                    if (p.quantityInSupply != 0) {
-                                      value.add(p);
-                                    }
-                                  } else {
-                                    value.add(p);
-                                  }
-                                } catch (e) {
-                                  print(e.toString());
-                                }
-                              });
-                              products = value;
-                              products.sort(
-                                  (a, b) => (a?.order ?? 0) - (b?.order ?? 0));
-                            } catch (e) {}
-
-                            return user?.role == UserType.admin
-                                ? ListView.builder(
-                                    itemBuilder: (context, index) {
-                                      return Slidable(
-                                        key:
-                                            Key(value[index].productDocumentId),
-                                        actionPane: SlidableDrawerActionPane(),
-                                        actions: <Widget>[
-                                          SlideAction(
-                                            onTap: () {
-                                              showBottomSheet(
-                                                  context: context,
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.only(
-                                                      topLeft:
-                                                          Radius.circular(20),
-                                                      topRight:
-                                                          Radius.circular(20),
-                                                    ),
-                                                  ),
-                                                  builder: (c) {
-                                                    return AddProductWidget(
-                                                      onAddClicked: (p) {
-                                                        viewModel
-                                                            .storeProduct(p)
-                                                            .catchError(
-                                                                (error) {
-                                                          showDialog(
-                                                            context: context,
-                                                            builder:
-                                                                (context) =>
-                                                                    OkDialog(
-                                                              title: AppLocalizations
-                                                                      .of(
-                                                                          context)
-                                                                  .translate(
-                                                                      'Error'),
-                                                              content: error
-                                                                  .toString(),
-                                                            ),
-                                                          );
-                                                        });
-                                                      },
-                                                      pc: value[index],
-
-//
-                                                    );
-                                                  });
-                                            },
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Container(
-                                                decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.all(
-                                                            Radius.circular(
-                                                                15.0))),
-                                                child: Material(
-                                                  shape: RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.all(
-                                                              Radius.circular(
-                                                                  15))),
-                                                  child: DecoratedBox(
-                                                    decoration: BoxDecoration(
-                                                      color: Colors.blue,
-                                                      borderRadius:
-                                                          BorderRadius.all(
-                                                              Radius.circular(
-                                                                  15.0)),
-                                                      boxShadow: [
-                                                        BoxShadow(
-                                                          color: Color(
-                                                                  0xFFABABAB)
-                                                              .withOpacity(0.7),
-                                                          blurRadius: 4.0,
-                                                          spreadRadius: 3.0,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    child: Container(
-                                                      decoration: BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius.all(
-                                                                Radius.circular(
-                                                                    15.0)),
-                                                        color: Colors.black12
-                                                            .withOpacity(0.1),
-                                                      ),
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(8.0),
-                                                        child: Container(
-                                                          child: Center(
-                                                            child: Column(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .center,
-                                                              children: <
-                                                                  Widget>[
-                                                                Icon(
-                                                                  Icons.edit,
-                                                                  color: kIcons,
-                                                                ),
-                                                                Text(
-                                                                  AppLocalizations.of(
-                                                                          context)
-                                                                      .translate(
-                                                                          'Edit'),
-                                                                  style: TextStyle(
-                                                                      color:
-                                                                          kIcons),
-                                                                )
-                                                              ],
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      height: double.infinity,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                        secondaryActions: <Widget>[
-                                          SlideAction(
-                                            onTap: () {
-                                              viewModel
-                                                  .deleteProduct(value[index]);
-                                            },
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Container(
-                                                decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.all(
-                                                            Radius.circular(
-                                                                15.0))),
-                                                child: Material(
-                                                  shape: RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.all(
-                                                              Radius.circular(
-                                                                  15))),
-                                                  child: DecoratedBox(
-                                                    decoration: BoxDecoration(
-                                                      color: Colors.red,
-                                                      borderRadius:
-                                                          BorderRadius.all(
-                                                              Radius.circular(
-                                                                  15.0)),
-                                                      boxShadow: [
-                                                        BoxShadow(
-                                                          color: Color(
-                                                                  0xFFABABAB)
-                                                              .withOpacity(0.7),
-                                                          blurRadius: 4.0,
-                                                          spreadRadius: 3.0,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    child: Container(
-                                                      decoration: BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius.all(
-                                                                Radius.circular(
-                                                                    15.0)),
-                                                        color: Colors.black12
-                                                            .withOpacity(0.1),
-                                                      ),
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(8.0),
-                                                        child: Container(
-                                                          child: Center(
-                                                            child: Column(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .center,
-                                                              children: <
-                                                                  Widget>[
-                                                                Icon(
-                                                                  Icons.delete,
-                                                                  color: kIcons,
-                                                                ),
-                                                                Text(
-                                                                  AppLocalizations.of(
-                                                                          context)
-                                                                      .translate(
-                                                                          'Delete'),
-                                                                  style: TextStyle(
-                                                                      color:
-                                                                          kIcons),
-                                                                )
-                                                              ],
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      height: double.infinity,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: ProductItem(
-                                            p: value[index],
-                                            onDownPress: value.last !=
-                                                    value[index]
-                                                ? () {
-                                                    FirebaseFirestore.instance
-                                                        .collection('products')
-                                                        .doc(value[index]
-                                                            .productDocumentId)
-                                                        .update({
-                                                      'order':
-                                                          value[index + 1].order
-                                                    });
-                                                    FirebaseFirestore.instance
-                                                        .collection('products')
-                                                        .doc(value[index + 1]
-                                                            .productDocumentId)
-                                                        .update({
-                                                      'order':
-                                                          value[index].order
-                                                    });
-                                                  }
-                                                : null,
-                                            onUpPress: value.first !=
-                                                    value[index]
-                                                ? () {
-                                                    FirebaseFirestore.instance
-                                                        .collection('products')
-                                                        .doc(value[index]
-                                                            .productDocumentId)
-                                                        .update({
-                                                      'order':
-                                                          value[index - 1].order
-                                                    });
-                                                    FirebaseFirestore.instance
-                                                        .collection('products')
-                                                        .doc(value[index - 1]
-                                                            .productDocumentId)
-                                                        .update({
-                                                      'order':
-                                                          value[index].order
-                                                    });
-                                                  }
-                                                : null,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                    itemCount: value.length,
-                                  )
-                                : ListView(
-                                    children: <Widget>[
-                                      ...value.map(
-                                        (e) => Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: ProductItem(p: e),
-                                        ),
-                                      ),
+                                        child: Align(
+                                            alignment: Alignment.bottomCenter,
+                                            child: Text(
+                                              AppLocalizations.of(context)
+                                                  .translate(
+                                                      'You have nothing here'),
+                                              style: TextStyle(
+                                                  fontSize: 16,
+                                                  color: kPrimary,
+                                                  shadows: [
+                                                    BoxShadow(
+                                                        color: Colors.white
+                                                            .withOpacity(1),
+                                                        blurRadius: 10.0,
+                                                        spreadRadius: 2.0)
+                                                  ]),
+                                            )),
+                                      )
                                     ],
                                   );
-                          },
-                        )),
+                                try {
+                                  try {
+                                    if (user.role == UserType.user) {
+                                      products = products.where((element) =>
+                                          element.quantityInSupply != 0);
+                                    }
+                                  } catch (e) {
+                                    print(e.toString());
+                                  }
+                                  products.sort((a, b) =>
+                                      (a?.order ?? 0) - (b?.order ?? 0));
+                                } catch (e) {}
+
+                                return user?.role == UserType.admin
+                                    ? ListView.builder(
+                                        itemBuilder: (context, index) {
+                                          return Slidable(
+                                            key: Key(products[index]
+                                                .productDocumentId),
+                                            actionPane:
+                                                SlidableDrawerActionPane(),
+                                            actions: <Widget>[
+                                              SlideAction(
+                                                onTap: () {
+                                                  showBottomSheet(
+                                                      context: context,
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius.only(
+                                                          topLeft:
+                                                              Radius.circular(
+                                                                  20),
+                                                          topRight:
+                                                              Radius.circular(
+                                                                  20),
+                                                        ),
+                                                      ),
+                                                      builder: (c) {
+                                                        return AddProductWidget(
+                                                          onAddClicked: (p) {
+                                                            viewModel
+                                                                .storeProduct(p)
+                                                                .catchError(
+                                                                    (error) {
+                                                              showDialog(
+                                                                context:
+                                                                    context,
+                                                                builder:
+                                                                    (context) =>
+                                                                        OkDialog(
+                                                                  title: AppLocalizations.of(
+                                                                          context)
+                                                                      .translate(
+                                                                          'Error'),
+                                                                  content: error
+                                                                      .toString(),
+                                                                ),
+                                                              );
+                                                            });
+                                                          },
+                                                          pc: products[index],
+
+//
+                                                        );
+                                                      });
+                                                },
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius.all(
+                                                                Radius.circular(
+                                                                    15.0))),
+                                                    child: Material(
+                                                      shape: RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius.all(
+                                                                  Radius
+                                                                      .circular(
+                                                                          15))),
+                                                      child: DecoratedBox(
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color: Colors.blue,
+                                                          borderRadius:
+                                                              BorderRadius.all(
+                                                                  Radius
+                                                                      .circular(
+                                                                          15.0)),
+                                                          boxShadow: [
+                                                            BoxShadow(
+                                                              color: Color(
+                                                                      0xFFABABAB)
+                                                                  .withOpacity(
+                                                                      0.7),
+                                                              blurRadius: 4.0,
+                                                              spreadRadius: 3.0,
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        child: Container(
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            borderRadius:
+                                                                BorderRadius.all(
+                                                                    Radius.circular(
+                                                                        15.0)),
+                                                            color: Colors
+                                                                .black12
+                                                                .withOpacity(
+                                                                    0.1),
+                                                          ),
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(8.0),
+                                                            child: Container(
+                                                              child: Center(
+                                                                child: Column(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .center,
+                                                                  children: <
+                                                                      Widget>[
+                                                                    Icon(
+                                                                      Icons
+                                                                          .edit,
+                                                                      color:
+                                                                          kIcons,
+                                                                    ),
+                                                                    Text(
+                                                                      AppLocalizations.of(
+                                                                              context)
+                                                                          .translate(
+                                                                              'Edit'),
+                                                                      style: TextStyle(
+                                                                          color:
+                                                                              kIcons),
+                                                                    )
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          height:
+                                                              double.infinity,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                            secondaryActions: <Widget>[
+                                              SlideAction(
+                                                onTap: () {
+                                                  viewModel.deleteProduct(
+                                                      products[index]);
+                                                },
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius.all(
+                                                                Radius.circular(
+                                                                    15.0))),
+                                                    child: Material(
+                                                      shape: RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius.all(
+                                                                  Radius
+                                                                      .circular(
+                                                                          15))),
+                                                      child: DecoratedBox(
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color: Colors.red,
+                                                          borderRadius:
+                                                              BorderRadius.all(
+                                                                  Radius
+                                                                      .circular(
+                                                                          15.0)),
+                                                          boxShadow: [
+                                                            BoxShadow(
+                                                              color: Color(
+                                                                      0xFFABABAB)
+                                                                  .withOpacity(
+                                                                      0.7),
+                                                              blurRadius: 4.0,
+                                                              spreadRadius: 3.0,
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        child: Container(
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            borderRadius:
+                                                                BorderRadius.all(
+                                                                    Radius.circular(
+                                                                        15.0)),
+                                                            color: Colors
+                                                                .black12
+                                                                .withOpacity(
+                                                                    0.1),
+                                                          ),
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(8.0),
+                                                            child: Container(
+                                                              child: Center(
+                                                                child: Column(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .center,
+                                                                  children: <
+                                                                      Widget>[
+                                                                    Icon(
+                                                                      Icons
+                                                                          .delete,
+                                                                      color:
+                                                                          kIcons,
+                                                                    ),
+                                                                    Text(
+                                                                      AppLocalizations.of(
+                                                                              context)
+                                                                          .translate(
+                                                                              'Delete'),
+                                                                      style: TextStyle(
+                                                                          color:
+                                                                              kIcons),
+                                                                    )
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          height:
+                                                              double.infinity,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: ProductItem(
+                                                p: products[index],
+                                                onDownPress: products.last !=
+                                                        products[index]
+                                                    ? () {
+                                                        FirebaseFirestore
+                                                            .instance
+                                                            .collection(
+                                                                'products')
+                                                            .doc(products[index]
+                                                                .productDocumentId)
+                                                            .update({
+                                                          'order': products[
+                                                                  index + 1]
+                                                              .order
+                                                        });
+                                                        FirebaseFirestore
+                                                            .instance
+                                                            .collection(
+                                                                'products')
+                                                            .doc(products[
+                                                                    index + 1]
+                                                                .productDocumentId)
+                                                            .update({
+                                                          'order':
+                                                              products[index]
+                                                                  .order
+                                                        });
+                                                      }
+                                                    : null,
+                                                onUpPress: products.first !=
+                                                        products[index]
+                                                    ? () {
+                                                        FirebaseFirestore
+                                                            .instance
+                                                            .collection(
+                                                                'products')
+                                                            .doc(products[index]
+                                                                .productDocumentId)
+                                                            .update({
+                                                          'order': products[
+                                                                  index - 1]
+                                                              .order
+                                                        });
+                                                        FirebaseFirestore
+                                                            .instance
+                                                            .collection(
+                                                                'products')
+                                                            .doc(products[
+                                                                    index - 1]
+                                                                .productDocumentId)
+                                                            .update({
+                                                          'order':
+                                                              products[index]
+                                                                  .order
+                                                        });
+                                                      }
+                                                    : null,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        itemCount: products.length,
+                                      )
+                                    : ListView(
+                                        children: <Widget>[
+                                          ...products.map(
+                                            (e) => Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: ProductItem(p: e),
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                              },
+                            ),
+                          ),
+                        ),
                         if (user?.role == UserType.admin) child,
                       ],
                     );
@@ -719,14 +756,14 @@ class _ProductItemState extends State<ProductItem> {
                                       fontSize: 12.0,
                                     ),
                                   ),
-                                  if (widget.p?.selectableAddons?.firstWhere(
+                                  if (widget.p?.checkableAddons?.firstWhere(
                                           (element) => element.isSelected,
                                           orElse: () => null) !=
                                       null)
                                     Row(
                                       children: [
                                         Text(
-                                          '${widget.p.selectableAddons.firstWhere((element) => element.isSelected, orElse: () => null).localizedName[AppLocalizations.of(context).locale.languageCode] ?? ''}: ',
+                                          '${widget.p.checkableAddons.firstWhere((element) => element.isSelected, orElse: () => null).localizedName[AppLocalizations.of(context).locale.languageCode] ?? ''}: ',
                                           style: TextStyle(
                                             color: Colors.black54,
                                             fontWeight: FontWeight.w500,
@@ -734,7 +771,7 @@ class _ProductItemState extends State<ProductItem> {
                                           ),
                                         ),
                                         Text(
-                                          '${widget.p.selectableAddons.firstWhere((element) => element.isSelected, orElse: () => null)?.price ?? ''}₾',
+                                          '${widget.p.checkableAddons.firstWhere((element) => element.isSelected, orElse: () => null)?.price ?? ''}₾',
                                           style: TextStyle(
                                             fontFamily: 'Sans',
                                             color: Colors.black54,
@@ -744,7 +781,7 @@ class _ProductItemState extends State<ProductItem> {
                                         ),
                                       ],
                                     ),
-                                  ...?widget?.p?.checkableAddons
+                                  ...?widget?.p?.selectableAddons
                                       ?.where((element) => element.isSelected)
                                       ?.map(
                                         (e) => Row(

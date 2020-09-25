@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart' as fundation;
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:male/Constants/Constants.dart';
 import 'package:male/Localizations/app_localizations.dart';
@@ -97,139 +98,191 @@ class _CategoryPageState extends State<CategoryPage> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
                       Expanded(
-                        child: ValueListenableBuilder<List<Category>>(
-                          valueListenable: viewModel.categories,
-                          builder: (_, categories, child) {
-                            return databaseUser?.role == UserType.admin
-                                ? ListView.builder(
-                                    itemCount:
-                                        viewModel.categories.value.length,
-                                    itemBuilder: (context, index) {
-                                      return Slidable(
-                                        key: Key(viewModel.categories
-                                                .value[index].localizedName[
-                                            AppLocalizations
-                                                .supportedLocales.first]),
-                                        actionPane: SlidableDrawerActionPane(),
-                                        actions: <Widget>[
-                                          SlideAction(
-                                            onTap: () {
-                                              var cat = Category.fromJson(
-                                                  viewModel
-                                                      .categories.value[index]
-                                                      .toJson());
-                                              showModalBottomSheet(
-                                                  context: context,
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.only(
-                                                      topLeft:
-                                                          Radius.circular(20),
-                                                      topRight:
-                                                          Radius.circular(20),
+                        child: ValueListenableBuilder<ConnectionState>(
+                          valueListenable: viewModel.categorieConnectionState,
+                          builder: (context, connectionState, child) {
+                            print(connectionState);
+                            if (connectionState == ConnectionState.waiting)
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation(kPrimary),
+                                ),
+                              );
+                            else
+                              return child;
+                          },
+                          child: ValueListenableBuilder<List<Category>>(
+                            valueListenable: viewModel.categories,
+                            builder: (_, categories, child) {
+                              if (categories.length == 0)
+                                return Stack(
+                                  children: [
+                                    Container(
+                                        constraints: BoxConstraints.expand(),
+                                        child: SvgPicture.asset(
+                                            'assets/svg/NoItem.svg')),
+                                    Padding(
+                                      padding: EdgeInsets.only(
+                                          bottom: MediaQuery.of(context)
+                                                  .size
+                                                  .height /
+                                              4),
+                                      child: Align(
+                                          alignment: Alignment.bottomCenter,
+                                          child: Text(
+                                            AppLocalizations.of(context)
+                                                .translate(
+                                                    'You have nothing here'),
+                                            style: TextStyle(
+                                                fontSize: 16,
+                                                color: kPrimary,
+                                                shadows: [
+                                                  BoxShadow(
+                                                      color: Colors.white
+                                                          .withOpacity(1),
+                                                      blurRadius: 10.0,
+                                                      spreadRadius: 2.0)
+                                                ]),
+                                          )),
+                                    )
+                                  ],
+                                );
+                              return databaseUser?.role == UserType.admin
+                                  ? ListView.builder(
+                                      itemCount:
+                                          viewModel.categories.value.length,
+                                      itemBuilder: (context, index) {
+                                        return Slidable(
+                                          key: Key(viewModel.categories
+                                                  .value[index].localizedName[
+                                              AppLocalizations
+                                                  .supportedLocales.first]),
+                                          actionPane:
+                                              SlidableDrawerActionPane(),
+                                          actions: <Widget>[
+                                            SlideAction(
+                                              onTap: () {
+                                                var cat = Category.fromJson(
+                                                    viewModel
+                                                        .categories.value[index]
+                                                        .toJson());
+                                                showModalBottomSheet(
+                                                    context: context,
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.only(
+                                                        topLeft:
+                                                            Radius.circular(20),
+                                                        topRight:
+                                                            Radius.circular(20),
+                                                      ),
                                                     ),
-                                                  ),
-                                                  builder: (c) {
-                                                    return EditCategoryWidget(
-                                                      category: cat,
-                                                      onEditClicked: (c) {
-                                                        viewModel.updateCategory(
-                                                            viewModel.categories
-                                                                .value[index],
-                                                            c);
-                                                      },
-                                                    );
-                                                  });
-                                            },
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: SlideActionElement(
-                                                iconData: Icons.edit,
-                                                color: Colors.blue,
-                                                text:
-                                                    AppLocalizations.of(context)
-                                                        .translate('Edit'),
+                                                    builder: (c) {
+                                                      return EditCategoryWidget(
+                                                        category: cat,
+                                                        onEditClicked: (c) {
+                                                          viewModel.updateCategory(
+                                                              viewModel
+                                                                  .categories
+                                                                  .value[index],
+                                                              c);
+                                                        },
+                                                      );
+                                                    });
+                                              },
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: SlideActionElement(
+                                                  iconData: Icons.edit,
+                                                  color: Colors.blue,
+                                                  text: AppLocalizations.of(
+                                                          context)
+                                                      .translate('Edit'),
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        ],
-                                        secondaryActions: <Widget>[
-                                          SlideAction(
-                                            onTap: () {
-                                              viewModel.deleteCategory(viewModel
-                                                  .categories.value[index]);
-                                            },
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: SlideActionElement(
-                                                iconData: Icons.delete,
-                                                text:
-                                                    AppLocalizations.of(context)
-                                                        .translate('Delete'),
-                                                color: Colors.red,
+                                          ],
+                                          secondaryActions: <Widget>[
+                                            SlideAction(
+                                              onTap: () {
+                                                viewModel.deleteCategory(
+                                                    viewModel.categories
+                                                        .value[index]);
+                                              },
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: SlideActionElement(
+                                                  iconData: Icons.delete,
+                                                  text: AppLocalizations.of(
+                                                          context)
+                                                      .translate('Delete'),
+                                                  color: Colors.red,
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        ],
-                                        child: itemCard(
-                                          onCategoryPress: () {
-                                            Navigator.of(context)
-                                                .push(MaterialPageRoute(
-                                                    builder: (c) => ProductPage(
-                                                          category: viewModel
-                                                              .categories
-                                                              .value[index],
-                                                        )));
-                                          },
-                                          onDownPress: categories.last !=
-                                                  viewModel
-                                                      .categories.value[index]
-                                              ? () {
-                                                  viewModel
-                                                      .switchCategoriesOrders(
-                                                          viewModel.categories
-                                                              .value[index],
-                                                          viewModel.categories
-                                                                  .value[
-                                                              index + 1]);
-                                                }
-                                              : null,
-                                          onUpPress: categories.first !=
-                                                  viewModel
-                                                      .categories.value[index]
-                                              ? () {
-                                                  viewModel
-                                                      .switchCategoriesOrders(
-                                                          viewModel.categories
-                                                              .value[index],
-                                                          viewModel.categories
-                                                                  .value[
-                                                              index - 1]);
-                                                }
-                                              : null,
-                                          category:
-                                              viewModel.categories.value[index],
-                                        ),
-                                      );
-                                    })
-                                : ListView(
-                                    children: <Widget>[
-                                      ...(categories.map((e) => itemCard(
+                                          ],
+                                          child: itemCard(
                                             onCategoryPress: () {
                                               Navigator.of(context).push(
                                                   MaterialPageRoute(
                                                       builder: (c) =>
                                                           ProductPage(
-                                                            category: e,
+                                                            category: viewModel
+                                                                .categories
+                                                                .value[index],
                                                           )));
                                             },
-                                            category: e,
-                                          )))
-                                    ],
-                                  );
-                          },
+                                            onDownPress:
+                                                categories.last !=
+                                                        viewModel.categories
+                                                            .value[index]
+                                                    ? () {
+                                                        viewModel.switchCategoriesOrders(
+                                                            viewModel.categories
+                                                                .value[index],
+                                                            viewModel.categories
+                                                                    .value[
+                                                                index + 1]);
+                                                      }
+                                                    : null,
+                                            onUpPress:
+                                                categories.first !=
+                                                        viewModel.categories
+                                                            .value[index]
+                                                    ? () {
+                                                        viewModel.switchCategoriesOrders(
+                                                            viewModel.categories
+                                                                .value[index],
+                                                            viewModel.categories
+                                                                    .value[
+                                                                index - 1]);
+                                                      }
+                                                    : null,
+                                            category: viewModel
+                                                .categories.value[index],
+                                          ),
+                                        );
+                                      })
+                                  : ListView(
+                                      children: <Widget>[
+                                        ...(categories.map((e) => itemCard(
+                                              onCategoryPress: () {
+                                                Navigator.of(context).push(
+                                                    MaterialPageRoute(
+                                                        builder: (c) =>
+                                                            ProductPage(
+                                                              category: e,
+                                                            )));
+                                              },
+                                              category: e,
+                                            )))
+                                      ],
+                                    );
+                            },
+                          ),
                         ),
                       ),
                       if (databaseUser?.role == UserType.admin &&

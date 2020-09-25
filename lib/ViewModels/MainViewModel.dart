@@ -26,6 +26,13 @@ class MainViewModel extends ChangeNotifier {
   ValueNotifier<bool> isSigningSignUping = ValueNotifier<bool>(false);
   ValueNotifier<DatabaseUser> databaseUser = ValueNotifier<DatabaseUser>(null);
   ValueNotifier<List<Category>> categories = ValueNotifier<List<Category>>([]);
+  ValueNotifier<ConnectionState> categorieConnectionState =
+      ValueNotifier<ConnectionState>(ConnectionState.none);
+
+  ValueNotifier<List<Product>> products = ValueNotifier<List<Product>>([]);
+  ValueNotifier<ConnectionState> productConnectionState =
+      ValueNotifier<ConnectionState>(ConnectionState.none);
+
   ValueNotifier<List<CartItem>> cart = ValueNotifier<List<CartItem>>([]);
   ValueNotifier<bool> newMessages = ValueNotifier<bool>(false);
   ValueNotifier<bool> adminNewMessages = ValueNotifier<bool>(false);
@@ -122,11 +129,13 @@ class MainViewModel extends ChangeNotifier {
         });
 
         categoryListener?.cancel();
+        categorieConnectionState.value = ConnectionState.none;
         categoryListener = FirebaseFirestore.instance
             .collection('/categories')
             .orderBy('order')
             .snapshots()
             .listen((event) {
+          categorieConnectionState.value = ConnectionState.active;
           List<Category> cs = [];
           event.docs.forEach((element) {
             var c = Category.fromJson(element.data());
@@ -134,22 +143,38 @@ class MainViewModel extends ChangeNotifier {
             cs.add(c);
           });
           categories.value = cs;
-        });
+        },
+                onDone: () =>
+                    categorieConnectionState.value = ConnectionState.done,
+                onError: (error) =>
+                    categorieConnectionState.value = ConnectionState.active);
+        categorieConnectionState.value = ConnectionState.waiting;
 
         productListener?.cancel();
-        categoryListener = FirebaseFirestore.instance
-            .collection('/categories')
-            .orderBy('order')
+        productConnectionState.value = ConnectionState.none;
+        productListener = FirebaseFirestore.instance
+            .collection('products')
             .snapshots()
-            .listen((event) {
-          List<Category> cs = [];
-          event.docs.forEach((element) {
-            var c = Category.fromJson(element.data());
-            c.documentId = element.id;
-            cs.add(c);
-          });
-          categories.value = cs;
-        });
+            .listen(
+          (event) {
+            productConnectionState.value = ConnectionState.active;
+            List<Product> ps = [];
+            event.docs.forEach((element) {
+              try {
+                var p = Product.fromJson(element.data());
+                p.productDocumentId = element.id;
+                ps.add(p);
+              } catch (e) {}
+            });
+            products.value = ps;
+          },
+          onDone: () {
+            productConnectionState.value = ConnectionState.done;
+          },
+          onError: (error) =>
+              productConnectionState.value = ConnectionState.active,
+        );
+        productConnectionState.value = ConnectionState.waiting;
         databaseUserListener?.cancel();
         databaseUserListener = FirebaseFirestore.instance
             .collection('/users')
@@ -289,11 +314,7 @@ class MainViewModel extends ChangeNotifier {
     });
     signAnonymouslyifNotSigned();
     prefs = await SharedPreferences.getInstance();
-    prefs.setString(
-        'ServerBaseAddress', 'http://bsoftstudio-001-site2.etempurl.com/');
-    /*prefs.setString('ServerBaseAddress', 'http://192.168.100.11:44379/');*/
-    prefs.setString('CheckoutBackLink',
-        '${prefs.getString('ServerBaseAddress')}CheckoutResult');
+    setPrefs(prefs);
   }
 
   Future<DocumentReference> storeCategory(Category c) async {
@@ -388,4 +409,12 @@ class MainViewModel extends ChangeNotifier {
       FirebaseStorage.instance.ref().child(element.refPath).delete();
     });
   }
+}
+
+void setPrefs(SharedPreferences prefs) {
+  prefs.setString(
+      'ServerBaseAddress', 'http://bsoftstudio-001-site2.etempurl.com/');
+  /*prefs.setString('ServerBaseAddress', 'http://192.168.100.11:44379/');*/
+  prefs.setString('CheckoutBackLink',
+      '${prefs.getString('ServerBaseAddress')}CheckoutResult');
 }

@@ -138,7 +138,8 @@ class _HomePageState extends State<HomePage> {
                           showSearch(
                               context: context,
                               delegate: CategorySearch(
-                                  categories: mainvViewModel.categories.value));
+                                  categories: mainvViewModel.categories.value,
+                                  products: mainvViewModel.products.value));
                         },
                       )
                     ],
@@ -399,7 +400,8 @@ class _HomePageState extends State<HomePage> {
 
 class CategorySearch extends SearchDelegate<String> {
   final List<Category> categories;
-  CategorySearch({this.categories});
+  final List<Product> products;
+  CategorySearch({this.categories, @required this.products});
   @override
   List<Widget> buildActions(BuildContext context) {
     return [
@@ -445,55 +447,48 @@ class CategorySearch extends SearchDelegate<String> {
     Map<Category, List<Product>> resultsMap =
         Map.fromIterable(suggestionList, key: (c) => c, value: (c) => null);
 
-    return FutureBuilder<QuerySnapshot>(
-      future: FirebaseFirestore.instance.collection('products').get(),
-      builder: (context, snapshot) {
-        var products = snapshot?.data?.docs?.map((e) {
-          Product p = Product.fromJson(e.data());
-          p.productDocumentId = e.id;
-          return p;
-        })?.where((element) => element
+    var filteredProducts = (query?.length != 0)
+        ? this.products?.where((element) => element
             .localizedName[AppLocalizations.of(context).locale.languageCode]
-            .contains(query));
-        products ??= [];
-        products.forEach((element) {
-          var cat = categories.firstWhere(
-              (cat) => element.documentId == cat.documentId,
-              orElse: () => null);
-          if (cat != null) {
-            resultsMap[cat] ??= [];
-            resultsMap[cat].add(element);
-          }
-        });
+            .contains(query))
+        : null;
+    filteredProducts ??= [];
+    filteredProducts.forEach((element) {
+      var cat = categories.firstWhere(
+          (cat) => element.documentId == cat.documentId,
+          orElse: () => null);
+      if (cat != null) {
+        resultsMap[cat] ??= [];
+        resultsMap[cat].add(element);
+      }
+    });
 
-        return ListView.builder(
-          itemCount: resultsMap.keys.length,
-          itemBuilder: (context, index) {
-            var c = resultsMap.keys.toList()[index];
-            return Column(
-              children: [
-                itemCard(
-                  category: c,
-                  onCategoryPress: () {
-                    Navigator.of(context).push(
-                        MaterialPageRoute(builder: (BuildContext context) {
-                      return ProductPage(
-                        category: c,
-                      );
-                    }));
-                  },
-                ),
-                if ((resultsMap[c]?.length ?? 0) > 0)
-                  ...?resultsMap[c].map((e) => Container(
-                        padding: EdgeInsets.only(
-                            left: 30, right: 8, top: 4, bottom: 4),
-                        child: ProductItem(
-                          p: e,
-                        ),
-                      )),
-              ],
-            );
-          },
+    return ListView.builder(
+      itemCount: resultsMap.keys.length,
+      itemBuilder: (context, index) {
+        var c = resultsMap.keys.toList()[index];
+        return Column(
+          children: [
+            itemCard(
+              category: c,
+              onCategoryPress: () {
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (BuildContext context) {
+                  return ProductPage(
+                    category: c,
+                  );
+                }));
+              },
+            ),
+            if ((resultsMap[c]?.length ?? 0) > 0)
+              ...?resultsMap[c].map((e) => Container(
+                    padding:
+                        EdgeInsets.only(left: 30, right: 8, top: 4, bottom: 4),
+                    child: ProductItem(
+                      p: e,
+                    ),
+                  )),
+          ],
         );
       },
     );

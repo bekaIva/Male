@@ -978,14 +978,14 @@ class OrderedProductWidget extends StatelessWidget {
                   fontSize: 12.0,
                 ),
               ),
-              if (product.selectableAddons?.firstWhere(
+              if (product.checkableAddons?.firstWhere(
                       (element) => element.isSelected,
                   orElse: () => null) !=
                   null)
                 Row(
                   children: [
                     Text(
-                      '${product.selectableAddons.firstWhere((element) => element.isSelected, orElse: () => null).localizedName[AppLocalizations.of(context).locale.languageCode]}: ',
+                      '${product.checkableAddons.firstWhere((element) => element.isSelected, orElse: () => null).localizedName[AppLocalizations.of(context).locale.languageCode]}: ',
                       style: TextStyle(
                         color: Colors.black54,
                         fontWeight: FontWeight.w500,
@@ -993,7 +993,7 @@ class OrderedProductWidget extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '${product.selectableAddons.firstWhere((element) => element.isSelected, orElse: () => null).price}₾',
+                      '${product.checkableAddons.firstWhere((element) => element.isSelected, orElse: () => null).price}₾',
                       style: TextStyle(fontFamily: 'Sans',
                         color: Colors.black54,
                         fontSize: 12.0,
@@ -1001,7 +1001,7 @@ class OrderedProductWidget extends StatelessWidget {
                     ),
                   ],
                 ),
-              ...?product.checkableAddons
+              ...?product.selectableAddons
                   ?.where((element) => element.isSelected)
                   ?.map(
                     (e) => Row(

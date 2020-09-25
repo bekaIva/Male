@@ -73,6 +73,4 @@ class MaleApp extends StatelessWidget {
       ),
     );
   }
-
-  Locale systemLocale() {}
 }

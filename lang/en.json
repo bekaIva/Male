@@ -78,6 +78,7 @@
   "Settings": "Settings",
   "Stop ordering": "Stop ordering",
   "Maximum order price": "Maximum order price",
+  "The order price exceeds the maximum amount": "The order price exceeds the maximum amount",
   "Minimum order price": "Minimum order price",
   "Delivery fee under maximum order price": "Delivery fee under maximum order price",
   "General": "General",
@@ -88,8 +89,6 @@
   "Order made": "Order made",
   "Payment status": "Payment status",
   "Order status": "Order status",
-
-
   "Pending": "Pending",
   "Accepted": "Accepted",
   "Completed": "Completed",
@@ -131,7 +130,6 @@
   "Cancel": "Cancel",
   "Canceled": "Canceled",
   "Export pdf": "Export pdf",
-  "Description": "Description",
   "Quantity": "Quantity",
   "Total": "Total",
   "INVOICE": "INVOICE",
@@ -141,7 +139,6 @@
   "Thank you for your business": "Thank you for your business",
   "Payment Info": "Payment Info",
   "Sub Total": "Sub Total",
-  "Thank you for your business": "Thank you for your business",
   "Checkout": "Checkout",
   "Base price": "Base price",
   "Product does not contain any product form": "Product does not contain any product form",
@@ -159,5 +156,15 @@
   "Weight": "Weight",
   "Back": "Back",
   "Send": "Send",
-  "Password reset email was sent": "Password reset email was sent"
+  "Password reset email was sent": "Password reset email was sent",
+
+  "Orders summary": "Orders summary",
+  "Orders count": "Orders count",
+  "Total orders": "Total orders",
+  "Completed orders": "Completed orders",
+  "Accepted orders": "Accepted orders",
+  "Canceled orders": "Canceled orders",
+  "Pending orders": "Pending orders",
+  "Orders by users": "Orders by users",
+  "Total paid": "Total paid"
 }

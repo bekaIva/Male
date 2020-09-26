@@ -64,8 +64,12 @@ class _ProductPageState extends State<ProductPage> {
                 onPressed: () {
                   showSearch(
                       context: context,
-                      delegate:
-                          ProductsSearch(products: viewModel.products.value));
+                      delegate: ProductsSearch(
+                          products: viewModel.products.value
+                              .where((element) =>
+                                  element.documentId ==
+                                  widget.category.documentId)
+                              .toList()));
                 },
               ),
               ValueListenableBuilder<List<CartItem>>(
@@ -557,16 +561,6 @@ class _ProductPageState extends State<ProductPage> {
                               onAddClicked: (p) async {
                                 p.documentId = widget.category.documentId;
                                 try {
-                                  var res = await FirebaseFirestore.instance
-                                      .collection('productsCounter')
-                                      .doc('counter')
-                                      .get(GetOptions(source: Source.server));
-                                  if (res.exists) {
-                                    var data = res.data();
-                                    p.order =
-                                        (data['count'] as num).toInt() + 1;
-                                  } else
-                                    p.order = 0;
                                   viewModel.storeProduct(p).catchError((error) {
                                     showDialog(
                                       context: context,
@@ -1533,22 +1527,202 @@ class ProductsSearch extends SearchDelegate<String> {
   @override
   Widget buildSuggestions(BuildContext context) {
     final List<Product> suggestionList = query.isEmpty
-        ? products.take(products.length > 10 ? 10 : products.length).toList()
+        ? products.take(products.length).toList()
         : products
             .where((element) => element
                 .localizedName[AppLocalizations.of(context).locale.languageCode]
                 ?.contains(query))
             .toList();
+    suggestionList.sort((a, b) => (a?.order ?? 0) - (b?.order ?? 0));
+    return Consumer<MainViewModel>(
+      builder: (context, viewModel, child) =>
+          ValueListenableBuilder<DatabaseUser>(
+        valueListenable: viewModel.databaseUser,
+        builder: (context, user, child) {
+          if (user.role == UserType.admin) {
+            return ListView.builder(
+              itemBuilder: (context, index) {
+                return Slidable(
+                  key: Key(suggestionList[index].productDocumentId),
+                  actionPane: SlidableDrawerActionPane(),
+                  actions: <Widget>[
+                    SlideAction(
+                      onTap: () {
+                        showBottomSheet(
+                            context: context,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(20),
+                                topRight: Radius.circular(20),
+                              ),
+                            ),
+                            builder: (c) {
+                              return AddProductWidget(
+                                onAddClicked: (p) {
+                                  viewModel.storeProduct(p).catchError((error) {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => OkDialog(
+                                        title: AppLocalizations.of(context)
+                                            .translate('Error'),
+                                        content: error.toString(),
+                                      ),
+                                    );
+                                  });
+                                },
+                                pc: suggestionList[index],
 
-    return ListView(
-      children: <Widget>[
-        ...suggestionList.map(
-          (e) => Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ProductItem(p: e),
-          ),
-        ),
-      ],
+//
+                              );
+                            });
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(15.0))),
+                          child: Material(
+                            shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(15))),
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: Colors.blue,
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(15.0)),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Color(0xFFABABAB).withOpacity(0.7),
+                                    blurRadius: 4.0,
+                                    spreadRadius: 3.0,
+                                  ),
+                                ],
+                              ),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(15.0)),
+                                  color: Colors.black12.withOpacity(0.1),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Container(
+                                    child: Center(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: <Widget>[
+                                          Icon(
+                                            Icons.edit,
+                                            color: kIcons,
+                                          ),
+                                          Text(
+                                            AppLocalizations.of(context)
+                                                .translate('Edit'),
+                                            style: TextStyle(color: kIcons),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                height: double.infinity,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                  secondaryActions: <Widget>[
+                    SlideAction(
+                      onTap: () {
+                        viewModel.deleteProduct(suggestionList[index]);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(15.0))),
+                          child: Material(
+                            shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(15))),
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(15.0)),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Color(0xFFABABAB).withOpacity(0.7),
+                                    blurRadius: 4.0,
+                                    spreadRadius: 3.0,
+                                  ),
+                                ],
+                              ),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(15.0)),
+                                  color: Colors.black12.withOpacity(0.1),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Container(
+                                    child: Center(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: <Widget>[
+                                          Icon(
+                                            Icons.delete,
+                                            color: kIcons,
+                                          ),
+                                          Text(
+                                            AppLocalizations.of(context)
+                                                .translate('Delete'),
+                                            style: TextStyle(color: kIcons),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                height: double.infinity,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ProductItem(
+                      p: suggestionList[index],
+                    ),
+                  ),
+                );
+              },
+              itemCount: suggestionList.length,
+            );
+          } else {
+            return ListView(
+              children: <Widget>[
+                ...suggestionList.map(
+                  (e) => Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ProductItem(p: e),
+                  ),
+                ),
+              ],
+            );
+          }
+        },
+      ),
     );
   }
 }

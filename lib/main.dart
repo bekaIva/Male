@@ -63,8 +63,16 @@ class MaleApp extends StatelessWidget {
           },
           title: 'Male',
           theme: ThemeData(
+            buttonTheme: ButtonThemeData(
+              buttonColor: kPrimary,
+              textTheme: ButtonTextTheme.normal,
+              colorScheme:
+                  Theme.of(context).colorScheme.copyWith(primary: kPrimary),
+            ),
             appBarTheme: AppBarTheme(color: kPrimary),
             primarySwatch: Colors.blue,
+            primaryColor: kPrimary,
+            accentColor: kPrimary,
             visualDensity: VisualDensity.adaptivePlatformDensity,
             textTheme: GoogleFonts.muktaVaaniTextTheme(),
           ),

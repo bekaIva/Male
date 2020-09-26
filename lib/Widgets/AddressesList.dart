@@ -34,13 +34,15 @@ class _AddressesListState extends State<AddressesList> {
           mainAxisAlignment: MainAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(e.name),
+            Expanded(child: Text(e.name)),
             SizedBox(
               width: 4,
             ),
-            Text(
-              e.addressName,
-              style: TextStyle(color: Colors.black54),
+            Expanded(
+              child: Text(
+                e.addressName,
+                style: TextStyle(color: Colors.black54),
+              ),
             )
           ],
         ),

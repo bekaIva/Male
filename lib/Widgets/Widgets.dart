@@ -2,18 +2,24 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image/image.dart' as Img;
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:male/Constants/Constants.dart';
 import 'package:male/Localizations/app_localizations.dart';
 import 'package:male/Models/CartItem.dart';
 import 'package:male/Models/Category.dart';
 import 'package:male/Models/FirestoreImage.dart';
+import 'package:male/Models/Order.dart';
 import 'package:male/Models/Product.dart';
+import 'package:male/Models/enums.dart';
 import 'package:male/ViewModels/MainViewModel.dart';
+import 'package:male/Views/OrderDetailPage.dart';
 import 'package:path/path.dart' as ppp;
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
@@ -934,6 +940,303 @@ class CartControl extends StatelessWidget {
             },
             valueListenable: viewModel.cart,
           )),
+    );
+  }
+}
+
+class OrdersSummaryWidget extends StatelessWidget {
+  final child;
+  final List<Order> orders;
+  const OrdersSummaryWidget({this.orders, this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Theme(
+        data: ThemeData(accentColor: kPrimary),
+        child: ExpansionTile(
+          leading:
+              Text(AppLocalizations.of(context).translate('Orders summary')),
+          title: Text(
+            '${AppLocalizations.of(context).translate('Orders count')}: ${orders.length.toString()}',
+            textAlign: TextAlign.right,
+          ),
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Orders",
+                  textAlign: TextAlign.center,
+                ),
+                DataTable(
+                  columns: [
+                    DataColumn(
+                        label: Text(AppLocalizations.of(context)
+                            .translate('Order status'))),
+                    DataColumn(
+                        label: Text(AppLocalizations.of(context)
+                            .translate('Quantity'))),
+                    DataColumn(
+                        label: Text(
+                            AppLocalizations.of(context).translate('Price')))
+                  ],
+                  rows: [
+                    DataRow(cells: [
+                      DataCell(Text(AppLocalizations.of(context)
+                          .translate('Total orders'))),
+                      DataCell(Text((orders?.length ?? 0).toString())),
+                      DataCell(Text(
+                        '${orders?.fold<double>(0, (previousValue, element) => previousValue + (element.products.fold<double>(0, (previousValue, element) => previousValue + element.totalProductPrice * (element.quantity ?? 1))) + element.deliveryFee)?.toStringAsFixed(0) ?? 0}₾',
+                        style: TextStyle(fontFamily: 'Sans'),
+                      )),
+                    ]),
+                    DataRow(cells: [
+                      DataCell(Text(AppLocalizations.of(context)
+                          .translate('Completed orders'))),
+                      DataCell(Text((orders
+                                  ?.where((element) => element
+                                      .deliveryStatusSteps[
+                                          DeliveryStatus.Completed]
+                                      .isActive)
+                                  ?.length ??
+                              0)
+                          .toString())),
+                      DataCell(Text(
+                        '${orders?.where((element) => element.deliveryStatusSteps[DeliveryStatus.Completed].isActive)?.fold<double>(0, (previousValue, element) => previousValue + (element.products.fold<double>(0, (previousValue, element) => previousValue + element.totalProductPrice * (element.quantity ?? 1))) + element.deliveryFee)?.toStringAsFixed(0) ?? 0}₾',
+                        style: TextStyle(fontFamily: 'Sans'),
+                      )),
+                    ]),
+                    DataRow(cells: [
+                      DataCell(Text(AppLocalizations.of(context)
+                          .translate('Accepted orders'))),
+                      DataCell(Text((orders
+                                  ?.where((element) => element
+                                      .deliveryStatusSteps[
+                                          DeliveryStatus.Accepted]
+                                      .isActive)
+                                  ?.length ??
+                              0)
+                          .toString())),
+                      DataCell(Text(
+                        '${orders?.where((element) => element.deliveryStatusSteps[DeliveryStatus.Accepted].isActive)?.fold<double>(0, (previousValue, element) => previousValue + (element.products.fold<double>(0, (previousValue, element) => previousValue + element.totalProductPrice * (element.quantity ?? 1))) + element.deliveryFee)?.toStringAsFixed(0) ?? 0}₾',
+                        style: TextStyle(fontFamily: 'Sans'),
+                      )),
+                    ]),
+                    DataRow(cells: [
+                      DataCell(Text(AppLocalizations.of(context)
+                          .translate('Pending orders'))),
+                      DataCell(Text((orders
+                                  ?.where((element) => element
+                                      .deliveryStatusSteps[
+                                          DeliveryStatus.Pending]
+                                      .isActive)
+                                  ?.length ??
+                              0)
+                          .toString())),
+                      DataCell(Text(
+                        '${orders?.where((element) => element.deliveryStatusSteps[DeliveryStatus.Pending].isActive)?.fold<double>(0, (previousValue, element) => previousValue + (element.products.fold<double>(0, (previousValue, element) => previousValue + element.totalProductPrice * (element.quantity ?? 1))) + element.deliveryFee)?.toStringAsFixed(0) ?? 0}₾',
+                        style: TextStyle(fontFamily: 'Sans'),
+                      )),
+                    ]),
+                    DataRow(cells: [
+                      DataCell(Text(AppLocalizations.of(context)
+                          .translate('Canceled orders'))),
+                      DataCell(Text((orders
+                                  ?.where((element) =>
+                                      element
+                                          .deliveryStatusSteps[
+                                              DeliveryStatus.Canceled]
+                                          ?.isActive ??
+                                      false)
+                                  ?.length ??
+                              0)
+                          .toString())),
+                      DataCell(Text(
+                        '${orders?.where((element) => element.deliveryStatusSteps[DeliveryStatus.Canceled]?.isActive ?? false)?.fold<double>(0, (previousValue, element) => previousValue + (element.products.fold<double>(0, (previousValue, element) => previousValue + element.totalProductPrice * (element.quantity ?? 1))) + element.deliveryFee)?.toStringAsFixed(2) ?? 0}₾',
+                        style: TextStyle(fontFamily: 'Sans'),
+                      )),
+                    ]),
+                  ],
+                ),
+              ],
+            ),
+            Divider(),
+            if (child != null) child
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class OrderWidget extends StatelessWidget {
+  final bool showIsSeenIcon;
+  final Order order;
+  OrderWidget({this.order, this.showIsSeenIcon = false});
+  @override
+  Widget build(BuildContext context) {
+    print(order.isSeen);
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Material(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+          elevation: 2,
+          child: RawMaterialButton(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+            onPressed: () {
+              if (showIsSeenIcon) {
+                if (!order.isSeen)
+                  FirebaseFirestore.instance
+                      .collection('/orders')
+                      .doc(order.documentId)
+                      .update({'isSeen': true});
+              }
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => OrderDetailPage(
+                  orderR: order,
+                ),
+              ));
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Material(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(4),
+                          topLeft: Radius.circular(4))),
+                  elevation: 2,
+                  color: kPrimary,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          DateFormat.yMd().add_Hms().format(
+                              (order.serverTime as Timestamp)?.toDate() ??
+                                  DateTime(0000)),
+                          style: TextStyle(
+                              color: kIcons,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14),
+                        ),
+                        if (showIsSeenIcon && !order.isSeen)
+                          Icon(
+                            Icons.star,
+                            color: kIcons,
+                          ),
+                        Text(
+                          '${AppLocalizations.of(context).translate('Order id')}: ${order.orderId?.toString() ?? ''}',
+                          style: TextStyle(color: kIcons),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+                Divider(),
+                Padding(
+                  padding: const EdgeInsets.only(left: 8, right: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          '${AppLocalizations.of(context).translate('Order price')}: ₾${(order.products.fold<double>(0, (previousValue, element) => previousValue + element.totalProductPrice * (element.quantity ?? 1)))?.toStringAsFixed(2) ?? '0'}',
+                          style: TextStyle(color: kPrimary, fontFamily: 'Sans'),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 30,
+                      ),
+                      Flexible(
+                        child: Text(
+                          '${AppLocalizations.of(context).translate('Delivery fee')}: ₾${order.deliveryFee?.toString() ?? '0'}',
+                          style: TextStyle(color: kPrimary, fontFamily: 'Sans'),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Material(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(2)),
+                          elevation: 4,
+                          color: Colors.grey.shade300,
+                          child: Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: Column(
+                              children: [
+                                Text(AppLocalizations.of(context)
+                                    .translate('Order status')),
+                                Text(AppLocalizations.of(context).translate(
+                                    EnumToString.convertToString(order
+                                        .deliveryStatusSteps.entries
+                                        .firstWhere(
+                                            (element) => element.value.isActive)
+                                        .key))),
+                              ],
+                            ),
+                          )),
+                      Material(
+                          color: Colors.grey.shade300,
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(2)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: Column(
+                              children: [
+                                Text(AppLocalizations.of(context)
+                                    .translate('Payment status')),
+                                Text(AppLocalizations.of(context).translate(
+                                    EnumToString.parse(order.paymentStatus))),
+                              ],
+                            ),
+                          ))
+                    ],
+                  ),
+                )
+              ],
+            ),
+          )),
+    );
+  }
+}
+
+class YouHaveNothingWidgets extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Container(
+            constraints: BoxConstraints.expand(),
+            child: SvgPicture.asset('assets/svg/NoItem.svg')),
+        Padding(
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(context).size.height / 4),
+          child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Text(
+                AppLocalizations.of(context).translate('You have nothing here'),
+                style: TextStyle(fontSize: 16, color: kPrimary, shadows: [
+                  BoxShadow(
+                      color: Colors.white.withOpacity(1),
+                      blurRadius: 10.0,
+                      spreadRadius: 2.0)
+                ]),
+              )),
+        )
+      ],
     );
   }
 }

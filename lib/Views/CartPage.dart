@@ -269,6 +269,19 @@ class _CartPageState extends State<CartPage> {
                                 FlatButton(
                                   onPressed: () async {
                                     try {
+                                      if (totalPrice >
+                                          settigns.maximumOrderPrice) {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) => OkDialog(
+                                            title: AppLocalizations.of(context)
+                                                .translate('Error'),
+                                            content:
+                                                '${AppLocalizations.of(context).translate('The order price exceeds the maximum amount')}! ${AppLocalizations.of(context).translate('Maximum order price')}[${settigns.maximumOrderPrice.toString()}]',
+                                          ),
+                                        );
+                                        return;
+                                      }
                                       ordering.value = true;
                                       var totalPriceWithDelivery = totalPrice >
                                               settigns.minimumOrderPrice

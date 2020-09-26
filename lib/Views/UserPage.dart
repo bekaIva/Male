@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:male/Constants/Constants.dart';
 import 'package:male/Localizations/app_localizations.dart';
 import 'package:male/Models/Address.dart';
@@ -17,7 +17,6 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'ContactPage.dart';
-import 'OrdersPage.dart';
 
 class UserPage extends StatefulWidget {
   final DatabaseUser user;
@@ -27,7 +26,12 @@ class UserPage extends StatefulWidget {
   _UserPageState createState() => _UserPageState();
 }
 
-class _UserPageState extends State<UserPage> {
+class _UserPageState extends State<UserPage>
+    with SingleTickerProviderStateMixin {
+  ValueNotifier<int> selectedIndex = ValueNotifier<int>(0);
+  ValueNotifier<List<DateTime>> pickedTime =
+      ValueNotifier<List<DateTime>>(null);
+  TabController tabController;
   ScrollController scrollController = ScrollController();
   TextEditingController sendMessageController = TextEditingController();
 
@@ -35,6 +39,18 @@ class _UserPageState extends State<UserPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
+
+    tabController = TabController(vsync: this, length: 3);
+    tabController.addListener(() {
+      selectedIndex.value = tabController.index;
+    });
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    tabController.dispose();
   }
 
   @override
@@ -51,7 +67,32 @@ class _UserPageState extends State<UserPage> {
                       : widget.user.email ??
                           AppLocalizations.of(context)
                               .translate('Unknown User'))),
+              actions: [
+                ValueListenableBuilder<int>(
+                  valueListenable: selectedIndex,
+                  builder: (context, index, child) {
+                    print(index);
+                    if (tabController.index == 2)
+                      return IconButton(
+                        onPressed: () async {
+                          pickedTime.value =
+                              await DateRagePicker.showDatePicker(
+                                  context: context,
+                                  initialFirstDate: new DateTime.now(),
+                                  initialLastDate: (new DateTime.now())
+                                      .add(new Duration(days: 1)),
+                                  firstDate: new DateTime(2015),
+                                  lastDate: new DateTime(2021));
+                        },
+                        icon: Icon(FontAwesome.filter),
+                      );
+                    else
+                      return Container();
+                  },
+                ),
+              ],
               bottom: TabBar(
+                controller: tabController,
                 indicatorColor: Colors.white,
                 tabs: <Widget>[
                   Tab(
@@ -67,6 +108,7 @@ class _UserPageState extends State<UserPage> {
               ),
             ),
             body: TabBarView(
+              controller: tabController,
               children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.only(
@@ -160,67 +202,65 @@ class _UserPageState extends State<UserPage> {
                 UserProfilePage(
                   user: widget.user,
                 ),
-                StreamBuilder<QuerySnapshot>(
+                StreamBuilder<List<Order>>(
                   stream: FirebaseFirestore.instance
                       .collection('orders')
                       .where('uid', isEqualTo: widget.user.uid)
                       .orderBy('serverTime', descending: true)
-                      .snapshots(),
+                      .snapshots()
+                      .map<List<Order>>((event) => event.docs.map((e) {
+                            var order = Order.fromJson(e.data());
+                            order.documentId = e.id;
+                            return order;
+                          }).toList()),
                   builder: (context, snapshot) {
-                    if (snapshot.data != null) {
-                      if (snapshot.connectionState == ConnectionState.waiting)
-                        return Center(
-                          child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation(kPrimary),
-                          ),
-                        );
-                      if (snapshot.data == null) return Text('No Data');
-
-                      if (snapshot.data.docs.length == 0)
-                        return Stack(
-                          children: [
-                            Container(
-                                constraints: BoxConstraints.expand(),
-                                child:
-                                    SvgPicture.asset('assets/svg/NoItem.svg')),
-                            Padding(
-                              padding: EdgeInsets.only(
-                                  bottom:
-                                      MediaQuery.of(context).size.height / 4),
-                              child: Align(
-                                  alignment: Alignment.bottomCenter,
-                                  child: Text(
-                                    AppLocalizations.of(context)
-                                        .translate('You have nothing here'),
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        color: kPrimary,
-                                        shadows: [
-                                          BoxShadow(
-                                              color:
-                                                  Colors.white.withOpacity(1),
-                                              blurRadius: 10.0,
-                                              spreadRadius: 2.0)
-                                        ]),
-                                  )),
-                            )
-                          ],
-                        );
-                      return ListView.builder(
-                        physics: BouncingScrollPhysics(),
-                        itemCount: snapshot.data.docs.length,
-                        itemBuilder: (context, index) {
-                          var order =
-                              Order.fromJson(snapshot.data.docs[index].data());
-                          order.documentId = snapshot.data.docs[index].id;
-                          return OrderWidget(
-                            order: order,
+                    return ValueListenableBuilder<List<DateTime>>(
+                      valueListenable: pickedTime,
+                      builder: (context, pickedTime, child) {
+                        if (snapshot.data != null) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting)
+                            return Center(
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation(kPrimary),
+                              ),
+                            );
+                          if (snapshot.data == null) return Text('No Data');
+                          List<Order> filteredOrders;
+                          if (pickedTime?.length == 2) {
+                            var startTime = pickedTime[0];
+                            var endTime = pickedTime[1];
+                            filteredOrders = snapshot.data.where((element) {
+                              return (element.serverTime as Timestamp)
+                                      .toDate()
+                                      .isAfter(startTime) &&
+                                  (element.serverTime as Timestamp)
+                                      .toDate()
+                                      .isBefore(endTime);
+                            }).toList();
+                          } else {
+                            filteredOrders = snapshot.data;
+                          }
+                          if (filteredOrders.length == 0)
+                            return YouHaveNothingWidgets();
+                          return ListView.builder(
+                            physics: BouncingScrollPhysics(),
+                            itemCount: filteredOrders.length + 1,
+                            itemBuilder: (context, index) {
+                              if (index == 0) {
+                                return OrdersSummaryWidget(
+                                    orders: filteredOrders);
+                              }
+                              var order = filteredOrders[index - 1];
+                              return OrderWidget(
+                                order: order,
+                              );
+                            },
                           );
-                        },
-                      );
-                    } else
-                      return Align(
-                          alignment: Alignment.center, child: Text('No Data'));
+                        } else
+                          return YouHaveNothingWidgets();
+                      },
+                    );
                   },
                 ),
               ],

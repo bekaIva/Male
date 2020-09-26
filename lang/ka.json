@@ -78,6 +78,7 @@
   "Settings": "პარამეტრები",
   "Stop ordering": "შეკვეთების შეჩერება",
   "Maximum order price": "მაქსიმალური ღირებულება",
+  "The order price exceeds the maximum amount": "შეკვეთის ფასი აღემატება მაქსიმალურ თანხას",
   "Minimum order price": "მინიმალური ღირებულება",
   "Delivery fee under maximum order price": "მიწოდების საფასური მინიმალური ღირებულების ქვემოთ",
   "General": "ზოგადი",
@@ -88,7 +89,6 @@
   "Order made": "შეკვეთა შესრულდა",
   "Payment status": "გადახდის სტატუსი",
   "Order status": "შეკვეთის სტატუსი",
-
   "Pending": "მოლოდინში",
   "Accepted": "მიღებული",
   "Completed": "შესრულებული",
@@ -130,14 +130,12 @@
   "Cancel": "გაუქმება",
   "Canceled": "გაუქმებული",
   "Export pdf": "Pdf ექსპორტი",
-  "Description": "აღწერა",
   "Quantity": "რაოდენობა",
   "Total": "სრულად",
   "INVOICE": "ინვოისი",
   "Invoice": "ინვოისი",
   "Date": "თარიღი",
   "Invoice to": "ინვოისი მასზედ",
-  "Thank you for your business": "მადლობა თქვენი საქმიანობისთვის",
   "Payment Info": "გადახდის დეტალები",
   "Sub Total": "ქვე სრული",
   "Thank you for your business": "გმადლობთ საქმიანობისთვის",
@@ -158,5 +156,15 @@
   "Weight": "წონა",
   "Back": "უკან",
   "Send": "გაგზავნა",
-  "Password reset email was sent": "პაროლის შეცვლის მეილი გაგზავნილია"
+  "Password reset email was sent": "პაროლის შეცვლის მეილი გაგზავნილია",
+
+  "Orders summary": "შეკვეთების ანგარიში",
+  "Orders count": "შეკვეთების რაოდენობა",
+  "Total orders": "შეკვეთები სრულად",
+  "Completed orders": "შესრულებული შეკვეთები",
+  "Accepted orders": "მღებული შეკვეთები",
+  "Canceled orders": "გაუქმებული შეკვეთები",
+  "Pending orders": "მომლოდინე შეკვეთები",
+  "Orders by users": "შეკვეთები მომხმარებლებით",
+  "Total paid": "გადახდილი სრულად"
 }

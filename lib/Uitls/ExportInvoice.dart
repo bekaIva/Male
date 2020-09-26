@@ -534,12 +534,12 @@ class Invoice {
                 case 2:
                   return (products[row].quantity ?? 1).toString();
                 case 3:
-                  return products[row].totalProductPrice.toString();
+                  return products[row].totalProductPrice.toStringAsFixed(2);
 
                 case 4:
                   return ((products[row].totalProductPrice) *
                           (products[row].quantity ?? 1))
-                      .toString();
+                      .toStringAsFixed(2);
               }
             }(),
           );

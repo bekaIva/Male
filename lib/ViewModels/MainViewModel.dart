@@ -42,6 +42,7 @@ class MainViewModel extends ChangeNotifier {
       ValueNotifier<AppSettings>(AppSettings());
   ValueNotifier<List<DatabaseUser>> users =
       ValueNotifier<List<DatabaseUser>>([]);
+  Function(List<DateTime> picked) orderTimePicked;
   MainViewModel() {
     init();
   }
@@ -318,8 +319,21 @@ class MainViewModel extends ChangeNotifier {
   }
 
   Future<DocumentReference> storeCategory(Category c) async {
-    c.order = categories.value.length > 0 ? categories.value.last.order + 1 : 1;
-
+    if (c.order == null) {
+      var res = await FirebaseFirestore.instance
+          .collection('productsCounter')
+          .doc('counter')
+          .get(GetOptions(source: Source.server));
+      if (res.exists) {
+        var data = res.data();
+        c.order = (data['count'] as num).toInt() + 1;
+      } else
+        c.order = 0;
+      await FirebaseFirestore.instance
+          .collection('productsCounter')
+          .doc('counter')
+          .set({'count': FieldValue.increment(1)}, SetOptions(merge: true));
+    }
     return FirebaseFirestore.instance.collection('/categories').doc()
       ..set(
           c.toJson(),
@@ -331,10 +345,21 @@ class MainViewModel extends ChangeNotifier {
   Future storeProduct(
     Product p,
   ) async {
-    await FirebaseFirestore.instance
-        .collection('productsCounter')
-        .doc('counter')
-        .set({'count': FieldValue.increment(1)}, SetOptions(merge: true));
+    if (p.order == null) {
+      var res = await FirebaseFirestore.instance
+          .collection('productsCounter')
+          .doc('counter')
+          .get(GetOptions(source: Source.server));
+      if (res.exists) {
+        var data = res.data();
+        p.order = (data['count'] as num).toInt() + 1;
+      } else
+        p.order = 0;
+      await FirebaseFirestore.instance
+          .collection('productsCounter')
+          .doc('counter')
+          .set({'count': FieldValue.increment(1)}, SetOptions(merge: true));
+    }
     await FirebaseFirestore.instance
         .collection('/products')
         .doc(p.productDocumentId)

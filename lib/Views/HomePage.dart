@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:male/Constants/Constants.dart';
 import 'package:male/Localizations/app_localizations.dart';
 import 'package:male/Models/Category.dart';
@@ -19,6 +21,7 @@ import 'package:male/Views/SettingsPage.dart';
 import 'package:male/Views/UsersPage.dart';
 import 'package:male/Views/singup_loginPage.dart';
 import 'package:male/Widgets/CategoryItemWidget.dart';
+import 'package:male/Widgets/Widgets.dart';
 import 'package:provider/provider.dart';
 
 import 'CartPage.dart';
@@ -136,10 +139,7 @@ class _HomePageState extends State<HomePage> {
                         icon: Icon(Icons.search),
                         onPressed: () {
                           showSearch(
-                              context: context,
-                              delegate: CategorySearch(
-                                  categories: mainvViewModel.categories.value,
-                                  products: mainvViewModel.products.value));
+                              context: context, delegate: CategorySearch());
                         },
                       )
                     ],
@@ -150,6 +150,22 @@ class _HomePageState extends State<HomePage> {
                   return AppBar(
                     title:
                         Text(AppLocalizations.of(context).translate('Orders')),
+                    actions: [
+                      IconButton(
+                        onPressed: () async {
+                          final List<DateTime> picked =
+                              await DateRagePicker.showDatePicker(
+                                  context: context,
+                                  initialFirstDate: new DateTime.now(),
+                                  initialLastDate: (new DateTime.now())
+                                      .add(new Duration(days: 1)),
+                                  firstDate: new DateTime(2015),
+                                  lastDate: new DateTime(2021));
+                          mainvViewModel.orderTimePicked?.call(picked);
+                        },
+                        icon: Icon(FontAwesome.filter),
+                      )
+                    ],
                   );
                 }
               case 2:
@@ -399,9 +415,7 @@ class _HomePageState extends State<HomePage> {
 }
 
 class CategorySearch extends SearchDelegate<String> {
-  final List<Category> categories;
-  final List<Product> products;
-  CategorySearch({this.categories, @required this.products});
+  CategorySearch();
   @override
   List<Widget> buildActions(BuildContext context) {
     return [
@@ -435,62 +449,365 @@ class CategorySearch extends SearchDelegate<String> {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    final List<Category> suggestionList = query.isEmpty
-        ? categories
-            .take(categories.length > 10 ? 10 : categories.length)
-            .toList()
-        : categories
-            .where((element) => element
-                .localizedName[AppLocalizations.of(context).locale.languageCode]
-                .contains(query))
-            .toList();
-    Map<Category, List<Product>> resultsMap =
-        Map.fromIterable(suggestionList, key: (c) => c, value: (c) => null);
+    return Consumer<MainViewModel>(
+      builder: (context, viewModel, child) =>
+          ValueListenableBuilder<List<Category>>(
+        valueListenable: viewModel.categories,
+        builder: (context, categories, child) =>
+            ValueListenableBuilder<List<Product>>(
+          valueListenable: viewModel.products,
+          builder: (context, products, child) {
+            final List<Category> suggestionList = query.isEmpty
+                ? categories
+                    .take(categories.length > 10 ? 10 : categories.length)
+                    .toList()
+                : categories
+                    .where((element) => element.localizedName[
+                            AppLocalizations.of(context).locale.languageCode]
+                        .contains(query))
+                    .toList();
+            Map<Category, List<Product>> resultsMap = Map.fromIterable(
+                suggestionList,
+                key: (c) => c,
+                value: (c) => null);
 
-    var filteredProducts = (query?.length != 0)
-        ? this.products?.where((element) => element
-            .localizedName[AppLocalizations.of(context).locale.languageCode]
-            .contains(query))
-        : null;
-    filteredProducts ??= [];
-    filteredProducts.forEach((element) {
-      var cat = categories.firstWhere(
-          (cat) => element.documentId == cat.documentId,
-          orElse: () => null);
-      if (cat != null) {
-        resultsMap[cat] ??= [];
-        resultsMap[cat].add(element);
-      }
-    });
+            var filteredProducts = (query?.length != 0)
+                ? products?.where((element) => element.localizedName[
+                        AppLocalizations.of(context).locale.languageCode]
+                    .contains(query))
+                : null;
+            filteredProducts ??= [];
+            filteredProducts.forEach((element) {
+              var cat = categories.firstWhere(
+                  (cat) => element.documentId == cat.documentId,
+                  orElse: () => null);
+              if (cat != null) {
+                resultsMap[cat] ??= [];
+                resultsMap[cat].add(element);
+              }
+            });
+            try {
+              resultsMap.values.forEach((element) {
+                try {
+                  element.sort((a, b) => (a?.order ?? 0) - (b?.order ?? 0));
+                } catch (e) {}
+              });
+            } catch (e) {}
+            return ValueListenableBuilder<DatabaseUser>(
+              valueListenable: viewModel.databaseUser,
+              builder: (context, user, child) {
+                if (user.role == UserType.admin) {
+                  return ListView.builder(
+                    itemBuilder: (context, index) {
+                      var c = resultsMap.keys.toList()[index];
+                      return Column(
+                        children: [
+                          Slidable(
+                            key: Key(c.localizedName[
+                                AppLocalizations.supportedLocales.first]),
+                            actionPane: SlidableDrawerActionPane(),
+                            actions: <Widget>[
+                              SlideAction(
+                                onTap: () {
+                                  var cat = Category.fromJson(c.toJson());
+                                  showModalBottomSheet(
+                                      context: context,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(20),
+                                          topRight: Radius.circular(20),
+                                        ),
+                                      ),
+                                      builder: (context) {
+                                        return EditCategoryWidget(
+                                          category: cat,
+                                          onEditClicked: (newC) {
+                                            viewModel.updateCategory(c, newC);
+                                          },
+                                        );
+                                      });
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: SlideActionElement(
+                                    iconData: Icons.edit,
+                                    color: Colors.blue,
+                                    text: AppLocalizations.of(context)
+                                        .translate('Edit'),
+                                  ),
+                                ),
+                              ),
+                            ],
+                            secondaryActions: <Widget>[
+                              SlideAction(
+                                onTap: () {
+                                  viewModel.deleteCategory(c);
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: SlideActionElement(
+                                    iconData: Icons.delete,
+                                    text: AppLocalizations.of(context)
+                                        .translate('Delete'),
+                                    color: Colors.red,
+                                  ),
+                                ),
+                              ),
+                            ],
+                            child: itemCard(
+                              onCategoryPress: () {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (context) => ProductPage(
+                                          category: c,
+                                        )));
+                              },
+                              category: c,
+                            ),
+                          ),
+                          if ((resultsMap[c]?.length ?? 0) > 0)
+                            ...?resultsMap[c].map((e) => Container(
+                                  padding: EdgeInsets.only(
+                                      left: 30, right: 8, top: 4, bottom: 4),
+                                  child: Slidable(
+                                    key: Key(e.productDocumentId),
+                                    actionPane: SlidableDrawerActionPane(),
+                                    actions: <Widget>[
+                                      SlideAction(
+                                        onTap: () {
+                                          showBottomSheet(
+                                              context: context,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.only(
+                                                  topLeft: Radius.circular(20),
+                                                  topRight: Radius.circular(20),
+                                                ),
+                                              ),
+                                              builder: (c) {
+                                                return AddProductWidget(
+                                                  onAddClicked: (p) {
+                                                    viewModel
+                                                        .storeProduct(p)
+                                                        .catchError((error) {
+                                                      showDialog(
+                                                        context: context,
+                                                        builder: (context) =>
+                                                            OkDialog(
+                                                          title: AppLocalizations
+                                                                  .of(context)
+                                                              .translate(
+                                                                  'Error'),
+                                                          content:
+                                                              error.toString(),
+                                                        ),
+                                                      );
+                                                    });
+                                                  },
+                                                  pc: e,
 
-    return ListView.builder(
-      itemCount: resultsMap.keys.length,
-      itemBuilder: (context, index) {
-        var c = resultsMap.keys.toList()[index];
-        return Column(
-          children: [
-            itemCard(
-              category: c,
-              onCategoryPress: () {
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (BuildContext context) {
-                  return ProductPage(
-                    category: c,
+//
+                                                );
+                                              });
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(15.0))),
+                                            child: Material(
+                                              shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(15))),
+                                              child: DecoratedBox(
+                                                decoration: BoxDecoration(
+                                                  color: Colors.blue,
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(
+                                                              15.0)),
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: Color(0xFFABABAB)
+                                                          .withOpacity(0.7),
+                                                      blurRadius: 4.0,
+                                                      spreadRadius: 3.0,
+                                                    ),
+                                                  ],
+                                                ),
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.all(
+                                                            Radius.circular(
+                                                                15.0)),
+                                                    color: Colors.black12
+                                                        .withOpacity(0.1),
+                                                  ),
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    child: Container(
+                                                      child: Center(
+                                                        child: Column(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .center,
+                                                          children: <Widget>[
+                                                            Icon(
+                                                              Icons.edit,
+                                                              color: kIcons,
+                                                            ),
+                                                            Text(
+                                                              AppLocalizations.of(
+                                                                      context)
+                                                                  .translate(
+                                                                      'Edit'),
+                                                              style: TextStyle(
+                                                                  color:
+                                                                      kIcons),
+                                                            )
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  height: double.infinity,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                    secondaryActions: <Widget>[
+                                      SlideAction(
+                                        onTap: () {
+                                          viewModel.deleteProduct(e);
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(15.0))),
+                                            child: Material(
+                                              shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(15))),
+                                              child: DecoratedBox(
+                                                decoration: BoxDecoration(
+                                                  color: Colors.red,
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(
+                                                              15.0)),
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: Color(0xFFABABAB)
+                                                          .withOpacity(0.7),
+                                                      blurRadius: 4.0,
+                                                      spreadRadius: 3.0,
+                                                    ),
+                                                  ],
+                                                ),
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.all(
+                                                            Radius.circular(
+                                                                15.0)),
+                                                    color: Colors.black12
+                                                        .withOpacity(0.1),
+                                                  ),
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    child: Container(
+                                                      child: Center(
+                                                        child: Column(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .center,
+                                                          children: <Widget>[
+                                                            Icon(
+                                                              Icons.delete,
+                                                              color: kIcons,
+                                                            ),
+                                                            Text(
+                                                              AppLocalizations.of(
+                                                                      context)
+                                                                  .translate(
+                                                                      'Delete'),
+                                                              style: TextStyle(
+                                                                  color:
+                                                                      kIcons),
+                                                            )
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  height: double.infinity,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: ProductItem(
+                                        p: e,
+                                      ),
+                                    ),
+                                  ),
+                                )),
+                        ],
+                      );
+                    },
+                    itemCount: resultsMap.keys.length,
                   );
-                }));
+                } else {
+                  return ListView.builder(
+                    itemCount: resultsMap.keys.length,
+                    itemBuilder: (context, index) {
+                      var c = resultsMap.keys.toList()[index];
+                      return Column(
+                        children: [
+                          itemCard(
+                            category: c,
+                            onCategoryPress: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (BuildContext context) {
+                                return ProductPage(
+                                  category: c,
+                                );
+                              }));
+                            },
+                          ),
+                          if ((resultsMap[c]?.length ?? 0) > 0)
+                            ...?resultsMap[c].map((e) => Container(
+                                  padding: EdgeInsets.only(
+                                      left: 30, right: 8, top: 4, bottom: 4),
+                                  child: ProductItem(
+                                    p: e,
+                                  ),
+                                )),
+                        ],
+                      );
+                    },
+                  );
+                }
               },
-            ),
-            if ((resultsMap[c]?.length ?? 0) > 0)
-              ...?resultsMap[c].map((e) => Container(
-                    padding:
-                        EdgeInsets.only(left: 30, right: 8, top: 4, bottom: 4),
-                    child: ProductItem(
-                      p: e,
-                    ),
-                  )),
-          ],
-        );
-      },
+            );
+          },
+        ),
+      ),
     );
   }
 }

@@ -699,20 +699,24 @@ class _ProductItemState extends State<ProductItem> {
                                   ...?widget.p.addonDescriptions
                                       ?.map((e) => Row(
                                             children: [
-                                              Text(
-                                                '${e.localizedAddonDescriptionName[AppLocalizations.of(context).locale.languageCode] ?? ''}: ',
-                                                style: TextStyle(
-                                                  color: Colors.black54,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 12.0,
+                                              Flexible(
+                                                child: Text(
+                                                  '${e.localizedAddonDescriptionName[AppLocalizations.of(context).locale.languageCode] ?? ''}: ',
+                                                  style: TextStyle(
+                                                    color: Colors.black54,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 12.0,
+                                                  ),
                                                 ),
                                               ),
-                                              Text(
-                                                '${e.localizedAddonDescription[AppLocalizations.of(context).locale.languageCode] ?? ''}',
-                                                style: TextStyle(
-                                                  color: Colors.black54,
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize: 12.0,
+                                              Flexible(
+                                                child: Text(
+                                                  '${e.localizedAddonDescription[AppLocalizations.of(context).locale.languageCode] ?? ''}',
+                                                  style: TextStyle(
+                                                    color: Colors.black54,
+                                                    fontWeight: FontWeight.w500,
+                                                    fontSize: 12.0,
+                                                  ),
                                                 ),
                                               ),
                                             ],
@@ -738,18 +742,23 @@ class _ProductItemState extends State<ProductItem> {
                                         ),
                                       ],
                                     ),
-                                  Text(
-                                    widget.p.localizedDescription[
-                                            AppLocalizations.of(context)
-                                                .locale
-                                                .languageCode] ??
-                                        '',
-                                    style: TextStyle(
-                                      color: Colors.black54,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 12.0,
+                                  if (widget.p.localizedDescription[
+                                          AppLocalizations.of(context)
+                                              .locale
+                                              .languageCode] !=
+                                      null)
+                                    Text(
+                                      widget.p.localizedDescription[
+                                              AppLocalizations.of(context)
+                                                  .locale
+                                                  .languageCode] ??
+                                          '',
+                                      style: TextStyle(
+                                        color: Colors.black54,
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 12.0,
+                                      ),
                                     ),
-                                  ),
                                   if (widget.p?.checkableAddons?.firstWhere(
                                           (element) => element.isSelected,
                                           orElse: () => null) !=
@@ -1070,6 +1079,7 @@ class _AddProductWidgetState extends State<AddProductWidget> {
                                   controller: TextEditingController(
                                       text: e.localizedAddonDescription[
                                           selectedLocal]),
+                                  maxLines: null,
                                   onChanged: (val) {
                                     e.localizedAddonDescription[selectedLocal] =
                                         val;

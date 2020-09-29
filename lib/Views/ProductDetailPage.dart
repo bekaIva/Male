@@ -93,6 +93,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           padding: EdgeInsets.only(left: 8, right: 8),
           child: SingleChildScrollView(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
               children: [
                 SizedBox(
@@ -138,20 +139,27 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 ),
                                 ...?widget.p.addonDescriptions.map((e) => Row(
                                       children: [
-                                        Text(
-                                          '${e.localizedAddonDescriptionName[AppLocalizations.of(context).locale.languageCode] ?? ''}: ',
-                                          style: TextStyle(
-                                            color: Colors.black54,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 12.0,
+                                        Flexible(
+                                          child: Text(
+                                            '${e.localizedAddonDescriptionName[AppLocalizations.of(context).locale.languageCode] ?? ''}: ',
+                                            style: TextStyle(
+                                              color: Colors.black54,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 12.0,
+                                            ),
                                           ),
                                         ),
-                                        Text(
-                                          '${e.localizedAddonDescription[AppLocalizations.of(context).locale.languageCode] ?? ''}',
-                                          style: TextStyle(
-                                            color: Colors.black54,
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: 12.0,
+                                        VerticalDivider(
+                                          width: 4,
+                                        ),
+                                        Flexible(
+                                          child: Text(
+                                            '${e.localizedAddonDescription[AppLocalizations.of(context).locale.languageCode] ?? ''}',
+                                            style: TextStyle(
+                                              color: Colors.black54,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 12.0,
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -284,15 +292,16 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                         fontSize: 12.0,
                                       ),
                                     ),
-                                    Text(
-                                      '+${e.price?.toString() ?? ''}₾',
-                                      style: TextStyle(
-                                        fontFamily: 'Sans',
-                                        color: Colors.black54,
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 12.0,
+                                    if (e.price != null)
+                                      Text(
+                                        '+${e.price?.toString() ?? ''}₾',
+                                        style: TextStyle(
+                                          fontFamily: 'Sans',
+                                          color: Colors.black54,
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 12.0,
+                                        ),
                                       ),
-                                    ),
                                   ],
                                 ),
                               ],

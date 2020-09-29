@@ -259,7 +259,7 @@ class _CartPageState extends State<CartPage> {
                                     Text(AppLocalizations.of(context)
                                         .translate('Total price')),
                                     Text(
-                                      '₾${(totalPrice == 0 ? 0 : totalPrice > settigns.minimumOrderPrice ? totalPrice : totalPrice + settigns.deliveryFeeUnderMaximumOrderPrice).toString()}',
+                                      '₾${(totalPrice == 0 ? 0 : totalPrice > settigns.minimumOrderPrice ? totalPrice : totalPrice + settigns.deliveryFeeUnderMaximumOrderPrice).toStringAsFixed(2)}',
                                       style: TextStyle(fontFamily: 'Sans'),
                                     )
                                   ],
@@ -514,20 +514,27 @@ class _CartItemWidgetState extends State<CartItemWidget> {
                             ...?widget.p.product.addonDescriptions
                                 .map((e) => Row(
                                       children: [
-                                        Text(
-                                          '${e.localizedAddonDescriptionName[AppLocalizations.of(context).locale.languageCode] ?? ''}: ',
-                                          style: TextStyle(
-                                            color: Colors.black54,
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: 12.0,
+                                        Flexible(
+                                          child: Text(
+                                            '${e.localizedAddonDescriptionName[AppLocalizations.of(context).locale.languageCode] ?? ''}: ',
+                                            style: TextStyle(
+                                              color: Colors.black54,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 12.0,
+                                            ),
                                           ),
                                         ),
-                                        Text(
-                                          '${e.localizedAddonDescription[AppLocalizations.of(context).locale.languageCode] ?? ''}',
-                                          style: TextStyle(
-                                            color: Colors.black54,
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: 12.0,
+                                        VerticalDivider(
+                                          width: 4,
+                                        ),
+                                        Flexible(
+                                          child: Text(
+                                            '${e.localizedAddonDescription[AppLocalizations.of(context).locale.languageCode] ?? ''}',
+                                            style: TextStyle(
+                                              color: Colors.black54,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 12.0,
+                                            ),
                                           ),
                                         ),
                                       ],

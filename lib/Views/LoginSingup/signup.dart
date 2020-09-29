@@ -155,7 +155,7 @@ class SignUp extends StatelessWidget {
                             title:
                                 AppLocalizations.of(context).translate('Error'),
                             content:
-                                '${AppLocalizations.of(context).translate('Registration failed')}: ${AppLocalizations.of(context).translate('Unknown error')}',
+                                '${AppLocalizations.of(context).translate('Registration failed')}: ${AppLocalizations.of(context).translate('Unknown error')} ${e.toString()}',
                           );
                         });
                   } finally {

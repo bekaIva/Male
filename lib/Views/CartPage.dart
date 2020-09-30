@@ -30,6 +30,7 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
+  TextEditingController messageController = TextEditingController();
   ValueNotifier<bool> ordering = ValueNotifier<bool>(false);
   PaymentMethods paymentMethod;
   UserAddress selectedAddress;
@@ -266,162 +267,209 @@ class _CartPageState extends State<CartPage> {
                                 ),
                               ),
                               if (totalPrice > 0 && user != null)
-                                FlatButton(
-                                  onPressed: () async {
-                                    try {
-                                      if (totalPrice >
-                                          settigns.maximumOrderPrice) {
-                                        showDialog(
-                                          context: context,
-                                          builder: (context) => OkDialog(
-                                            title: AppLocalizations.of(context)
-                                                .translate('Error'),
-                                            content:
-                                                '${AppLocalizations.of(context).translate('The order price exceeds the maximum amount')}! ${AppLocalizations.of(context).translate('Maximum order price')}[${settigns.maximumOrderPrice.toString()}]',
-                                          ),
-                                        );
-                                        return;
-                                      }
-                                      ordering.value = true;
-                                      var totalPriceWithDelivery = totalPrice >
-                                              settigns.minimumOrderPrice
-                                          ? totalPrice
-                                          : totalPrice +
-                                              settigns
-                                                  .deliveryFeeUnderMaximumOrderPrice;
-                                      if (selectedAddress == null)
-                                        throw new MessageException(
-                                            AppLocalizations.of(context)
-                                                .translate(
-                                                    'Address not selected'));
-                                      if (settigns.stopOrdering) {
-                                        throw new MessageException(
-                                            AppLocalizations.of(context).translate(
-                                                'The service is temporarily unavailable'));
-                                      }
-                                      if (paymentMethod == null)
-                                        throw new MessageException(
-                                            AppLocalizations.of(context).translate(
-                                                'Payment method not selected'));
-                                      var o = Order(
-                                          deliveryStatusSteps: {
-                                            DeliveryStatus.Pending:
-                                                DeliveryStatusStep(
-                                                    isActive: true,
-                                                    creationTimestamp:
-                                                        FieldValue
-                                                            .serverTimestamp(),
-                                                    stepState:
-                                                        StepState.indexed),
-                                            DeliveryStatus.Accepted:
-                                                DeliveryStatusStep(
-                                                    isActive: false,
-                                                    stepState:
-                                                        StepState.indexed),
-                                            DeliveryStatus.Completed:
-                                                DeliveryStatusStep(
-                                                    isActive: false,
-                                                    stepState:
-                                                        StepState.indexed)
-                                          },
-                                          orderId: viewModel.lastOrderId ?? 0,
-                                          isSeen: false,
-                                          serverTime:
-                                              FieldValue.serverTimestamp(),
-                                          uid: user.uid,
-                                          deliveryAddress: selectedAddress,
-                                          paymentMethod: paymentMethod,
-                                          products: cart
-                                              .map((e) => e.product)
-                                              .toList(),
-                                          deliveryFee: totalPrice == 0
-                                              ? 0
-                                              : totalPrice >
-                                                      settigns.minimumOrderPrice
-                                                  ? 0
-                                                  : settigns
-                                                      .deliveryFeeUnderMaximumOrderPrice);
-                                      var value = await FirebaseFirestore
-                                          .instance
-                                          .collection('/orders')
-                                          .add(o.toJson());
+                                Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      Divider(),
+                                      TextField(
+                                        controller: messageController,
+                                        style: kDescriptionTextStyle,
+                                        maxLines: null,
+                                        onChanged: (message) {},
+                                        cursorColor: kPrimary,
+                                        decoration: InputDecoration(
+                                            border: InputBorder.none,
+                                            hintText:
+                                                AppLocalizations.of(context)
+                                                    .translate(
+                                                        'Leave us a message')),
+                                      ),
+                                      FlatButton(
+                                        color: kPrimary,
+                                        onPressed: () async {
+                                          try {
+                                            if (totalPrice >
+                                                settigns.maximumOrderPrice) {
+                                              showDialog(
+                                                context: context,
+                                                builder: (context) => OkDialog(
+                                                  title: AppLocalizations.of(
+                                                          context)
+                                                      .translate('Error'),
+                                                  content:
+                                                      '${AppLocalizations.of(context).translate('The order price exceeds the maximum amount')}! ${AppLocalizations.of(context).translate('Maximum order price')}[${settigns.maximumOrderPrice.toString()}]',
+                                                ),
+                                              );
+                                              return;
+                                            }
+                                            ordering.value = true;
+                                            var totalPriceWithDelivery =
+                                                totalPrice >
+                                                        settigns
+                                                            .minimumOrderPrice
+                                                    ? totalPrice
+                                                    : totalPrice +
+                                                        settigns
+                                                            .deliveryFeeUnderMaximumOrderPrice;
+                                            if (selectedAddress == null)
+                                              throw new MessageException(
+                                                  AppLocalizations.of(context)
+                                                      .translate(
+                                                          'Address not selected'));
+                                            if (settigns.stopOrdering) {
+                                              throw new MessageException(
+                                                  AppLocalizations.of(context)
+                                                      .translate(
+                                                          'The service is temporarily unavailable'));
+                                            }
+                                            if (paymentMethod == null)
+                                              throw new MessageException(
+                                                  AppLocalizations.of(context)
+                                                      .translate(
+                                                          'Payment method not selected'));
+                                            var o = Order(
+                                                orderMessage:
+                                                    messageController.text,
+                                                deliveryStatusSteps: {
+                                                  DeliveryStatus.Pending:
+                                                      DeliveryStatusStep(
+                                                          isActive: true,
+                                                          creationTimestamp:
+                                                              FieldValue
+                                                                  .serverTimestamp(),
+                                                          stepState: StepState
+                                                              .indexed),
+                                                  DeliveryStatus.Accepted:
+                                                      DeliveryStatusStep(
+                                                          isActive: false,
+                                                          stepState: StepState
+                                                              .indexed),
+                                                  DeliveryStatus.Completed:
+                                                      DeliveryStatusStep(
+                                                          isActive: false,
+                                                          stepState:
+                                                              StepState.indexed)
+                                                },
+                                                orderId:
+                                                    viewModel.lastOrderId ?? 0,
+                                                isSeen: false,
+                                                serverTime: FieldValue
+                                                    .serverTimestamp(),
+                                                uid: user.uid,
+                                                deliveryAddress:
+                                                    selectedAddress,
+                                                paymentMethod: paymentMethod,
+                                                products: cart
+                                                    .map((e) => e.product)
+                                                    .toList(),
+                                                deliveryFee: totalPrice == 0
+                                                    ? 0
+                                                    : totalPrice >
+                                                            settigns
+                                                                .minimumOrderPrice
+                                                        ? 0
+                                                        : settigns
+                                                            .deliveryFeeUnderMaximumOrderPrice);
+                                            var value = await FirebaseFirestore
+                                                .instance
+                                                .collection('/orders')
+                                                .add(o.toJson());
 
-                                      FirebaseFirestore.instance
-                                          .collection('/settings')
-                                          .doc('ordersCounterDocument')
-                                          .set({
-                                        'ordersCounterField':
-                                            FieldValue.increment(1)
-                                      }, SetOptions(merge: true));
-                                      cart.forEach((element) {
-                                        if (element.product.quantityInSupply !=
-                                                null &&
-                                            element.product.quantityInSupply >=
-                                                element.product.quantity) {
-                                          FirebaseFirestore.instance
-                                              .collection('products')
-                                              .doc(element
-                                                  .product.productDocumentId)
-                                              .update({
-                                            'quantityInSupply':
-                                                FieldValue.increment(
-                                                    -element.product.quantity)
-                                          });
-                                        }
+                                            FirebaseFirestore.instance
+                                                .collection('/settings')
+                                                .doc('ordersCounterDocument')
+                                                .set({
+                                              'ordersCounterField':
+                                                  FieldValue.increment(1)
+                                            }, SetOptions(merge: true));
+                                            cart.forEach((element) {
+                                              if (element.product
+                                                          .quantityInSupply !=
+                                                      null &&
+                                                  element.product
+                                                          .quantityInSupply >=
+                                                      element
+                                                          .product.quantity) {
+                                                FirebaseFirestore.instance
+                                                    .collection('products')
+                                                    .doc(element.product
+                                                        .productDocumentId)
+                                                    .update({
+                                                  'quantityInSupply':
+                                                      FieldValue.increment(
+                                                          -element
+                                                              .product.quantity)
+                                                });
+                                              }
 
-                                        FirebaseFirestore.instance
-                                            .collection('cart')
-                                            .doc(element.documentId)
-                                            .delete();
-                                      });
-                                      o.documentId = value.id;
-                                      if (paymentMethod ==
-                                          PaymentMethods.CreditCard) {
-                                        var res = await http.post(
-                                            '${viewModel.prefs.getString('ServerBaseAddress')}Api/Orders/CheckoutFlutter',
-                                            body: jsonEncode(o.toCheckoutJson(context)),
-                                            headers: {
-                                              'Content-Type': 'application/json'
+                                              FirebaseFirestore.instance
+                                                  .collection('cart')
+                                                  .doc(element.documentId)
+                                                  .delete();
                                             });
-                                        if (res.statusCode == 200) {
-                                          var decoded = jsonDecode(res.body)
-                                              as Map<String, dynamic>;
-                                          Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      UnipayCheckoutPage(
-                                                        order: o,
-                                                        createOrderResult:
-                                                            decoded,
-                                                      )));
-                                        }
-                                      }
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) => OkDialog(
-                                          content: AppLocalizations.of(context)
-                                              .translate('Order made'),
-                                          title: AppLocalizations.of(context)
-                                              .translate('Information'),
+                                            o.documentId = value.id;
+                                            if (paymentMethod ==
+                                                PaymentMethods.CreditCard) {
+                                              var res = await http.post(
+                                                  '${viewModel.prefs.getString('ServerBaseAddress')}Api/Orders/CheckoutFlutter',
+                                                  body: jsonEncode(o.toCheckoutJson(context)),
+                                                  headers: {
+                                                    'Content-Type':
+                                                        'application/json'
+                                                  });
+                                              if (res.statusCode == 200) {
+                                                var decoded =
+                                                    jsonDecode(res.body)
+                                                        as Map<String, dynamic>;
+                                                Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            UnipayCheckoutPage(
+                                                              order: o,
+                                                              createOrderResult:
+                                                                  decoded,
+                                                            )));
+                                              }
+                                            }
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) => OkDialog(
+                                                content: AppLocalizations.of(
+                                                        context)
+                                                    .translate('Order made'),
+                                                title: AppLocalizations.of(
+                                                        context)
+                                                    .translate('Information'),
+                                              ),
+                                            );
+                                            AudioCache()
+                                                .play('OrderRecieved.mp3');
+                                          } on MessageException catch (me) {
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) => OkDialog(
+                                                title:
+                                                    AppLocalizations.of(context)
+                                                        .translate('Error'),
+                                                content: me.message,
+                                              ),
+                                            );
+                                          } catch (e) {} finally {
+                                            ordering.value = false;
+                                          }
+                                        },
+                                        child: Text(
+                                          AppLocalizations.of(context)
+                                              .translate('Place order'),
+                                          style: TextStyle(color: kIcons),
                                         ),
-                                      );
-                                      AudioCache().play('OrderRecieved.mp3');
-                                    } on MessageException catch (me) {
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) => OkDialog(
-                                          title: AppLocalizations.of(context)
-                                              .translate('Error'),
-                                          content: me.message,
-                                        ),
-                                      );
-                                    } catch (e) {} finally {
-                                      ordering.value = false;
-                                    }
-                                  },
-                                  child: Text(AppLocalizations.of(context)
-                                      .translate('Place order')),
+                                      ),
+                                    ],
+                                  ),
                                 )
                             ],
                           ),

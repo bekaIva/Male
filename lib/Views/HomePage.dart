@@ -229,6 +229,7 @@ class _HomePageState extends State<HomePage> {
                                         Icons.arrow_drop_down,
                                         color: kIcons,
                                       ),
+                                      underline: Container(),
                                       onChanged: (val) {
                                         languageSettings.setLocale(val);
                                       },
@@ -237,13 +238,32 @@ class _HomePageState extends State<HomePage> {
                                       items: AppLocalizations.supportedLocales
                                           .map((e) => DropdownMenuItem(
                                                 value: e,
-                                                child: Text(e.languageCode),
+                                                child: Text(e.countryCode
+                                                    .toUpperCase()
+                                                    .replaceAllMapped(
+                                                        RegExp(r'[A-Z]'),
+                                                        (match) => String
+                                                            .fromCharCode(match
+                                                                    .group(0)
+                                                                    .codeUnitAt(
+                                                                        0) +
+                                                                127397))),
                                               ))
                                           .toList(),
                                       selectedItemBuilder: (context) =>
                                           AppLocalizations.supportedLocales
                                               .map((e) => Text(
-                                                    e.languageCode,
+                                                    e.countryCode
+                                                        .toUpperCase()
+                                                        .replaceAllMapped(
+                                                            RegExp(r'[A-Z]'),
+                                                            (match) => String
+                                                                .fromCharCode(match
+                                                                        .group(
+                                                                            0)
+                                                                        .codeUnitAt(
+                                                                            0) +
+                                                                    127397)),
                                                     style: TextStyle(
                                                         color: kIcons),
                                                   ))
@@ -554,7 +574,7 @@ class CategorySearch extends SearchDelegate<String> {
                                 ),
                               ),
                             ],
-                            child: itemCard(
+                            child: CategoryWidget(
                               onCategoryPress: () {
                                 Navigator.of(context).push(MaterialPageRoute(
                                     builder: (context) => ProductPage(
@@ -779,7 +799,7 @@ class CategorySearch extends SearchDelegate<String> {
                       var c = resultsMap.keys.toList()[index];
                       return Column(
                         children: [
-                          itemCard(
+                          CategoryWidget(
                             category: c,
                             onCategoryPress: () {
                               Navigator.of(context).push(MaterialPageRoute(

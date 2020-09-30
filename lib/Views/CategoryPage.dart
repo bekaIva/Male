@@ -224,7 +224,7 @@ class _CategoryPageState extends State<CategoryPage> {
                                               ),
                                             ),
                                           ],
-                                          child: itemCard(
+                                          child: CategoryWidget(
                                             onCategoryPress: () {
                                               Navigator.of(context).push(
                                                   MaterialPageRoute(
@@ -268,17 +268,18 @@ class _CategoryPageState extends State<CategoryPage> {
                                       })
                                   : ListView(
                                       children: <Widget>[
-                                        ...(categories.map((e) => itemCard(
-                                              onCategoryPress: () {
-                                                Navigator.of(context).push(
-                                                    MaterialPageRoute(
-                                                        builder: (c) =>
-                                                            ProductPage(
-                                                              category: e,
-                                                            )));
-                                              },
-                                              category: e,
-                                            )))
+                                        ...(categories
+                                            .map((e) => CategoryWidget(
+                                                  onCategoryPress: () {
+                                                    Navigator.of(context).push(
+                                                        MaterialPageRoute(
+                                                            builder: (c) =>
+                                                                ProductPage(
+                                                                  category: e,
+                                                                )));
+                                                  },
+                                                  category: e,
+                                                )))
                                       ],
                                     );
                             },

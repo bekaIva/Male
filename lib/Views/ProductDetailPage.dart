@@ -89,414 +89,418 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             ),
           ],
         ),
-        body: Padding(
-          padding: EdgeInsets.only(left: 8, right: 8),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(
-                  height: 10,
-                ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Container(
-                      height: 140,
-                      width: 160,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(4),
-                          image: DecorationImage(
-                            fit: BoxFit.cover,
-                            image: safeNetworkImage(widget.p?.images
-                                ?.firstWhere((element) => true,
-                                    orElse: () => null)
-                                ?.downloadUrl),
-                          )),
-                    ),
-                    Expanded(
-                      child: Container(
-                        padding: EdgeInsets.only(left: 12, top: 12),
-                        child: ValueListenableBuilder<DatabaseUser>(
-                          builder: (context, user, child) {
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Text(
-                                  widget.p.localizedName[
-                                          AppLocalizations.of(context)
-                                              .locale
-                                              .languageCode] ??
-                                      '',
-                                  style: TextStyle(
-                                      fontFamily: "Sans",
-                                      color: Colors.black87,
-                                      fontWeight: FontWeight.w700),
-                                ),
-                                SizedBox(
-                                  height: 4,
-                                ),
-                                ...?widget.p.addonDescriptions.map((e) => Row(
-                                      children: [
-                                        Flexible(
-                                          child: Text(
-                                            '${e.localizedAddonDescriptionName[AppLocalizations.of(context).locale.languageCode] ?? ''}: ',
-                                            style: TextStyle(
-                                              color: Colors.black54,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12.0,
-                                            ),
-                                          ),
-                                        ),
-                                        VerticalDivider(
-                                          width: 4,
-                                        ),
-                                        Flexible(
-                                          child: Text(
-                                            '${e.localizedAddonDescription[AppLocalizations.of(context).locale.languageCode] ?? ''}',
-                                            style: TextStyle(
-                                              color: Colors.black54,
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 12.0,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    )),
-                                if (widget.p.quantityInSupply != null)
-                                  Row(
+        body: ValueListenableBuilder<DatabaseUser>(
+          valueListenable: viewModel.databaseUser,
+          builder: (context, user, child) => Padding(
+            padding: EdgeInsets.only(left: 8, right: 8),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Hero(
+                        tag: 'headerImage${widget.p.productDocumentId}',
+                        child: Container(
+                          height: 140,
+                          width: 160,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(4),
+                              image: DecorationImage(
+                                fit: BoxFit.cover,
+                                image: safeNetworkImage(widget.p?.images
+                                    ?.firstWhere((element) => true,
+                                        orElse: () => null)
+                                    ?.downloadUrl),
+                              )),
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          padding: EdgeInsets.only(left: 12, top: 12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                widget.p.localizedName[
+                                        AppLocalizations.of(context)
+                                            .locale
+                                            .languageCode] ??
+                                    '',
+                                style: TextStyle(
+                                    fontFamily: "Sans",
+                                    color: Colors.black87,
+                                    fontWeight: FontWeight.w700),
+                              ),
+                              SizedBox(
+                                height: 4,
+                              ),
+                              ...?widget.p.addonDescriptions.map((e) => Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Text(
-                                        '${AppLocalizations.of(context).translate('Quantity in supply')}: ',
-                                        style: TextStyle(
-                                          color: Colors.black54,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12.0,
+                                      Flexible(
+                                        child: Text(
+                                          '${e.localizedAddonDescriptionName[AppLocalizations.of(context).locale.languageCode] ?? ''}: ',
+                                          style: TextStyle(
+                                            color: Colors.black54,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12.0,
+                                          ),
                                         ),
                                       ),
-                                      Text(
-                                        widget.p.quantityInSupply.toString(),
-                                        style: TextStyle(
-                                          color: Colors.black54,
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 12.0,
+                                      VerticalDivider(
+                                        width: 4,
+                                      ),
+                                      Flexible(
+                                        child: Text(
+                                          '${e.localizedAddonDescription[AppLocalizations.of(context).locale.languageCode] ?? ''}',
+                                          style: TextStyle(
+                                            color: Colors.black54,
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 12.0,
+                                          ),
                                         ),
                                       ),
                                     ],
-                                  ),
-                                ...?widget.p.checkableAddons
-                                    ?.map((e) => Row(
-                                          children: [
-                                            Radio(
-                                              activeColor: kPrimary,
-                                              value: e,
-                                              groupValue: widget
-                                                  ?.p?.checkableAddons
-                                                  ?.firstWhere(
-                                                      (element) =>
-                                                          element.isSelected,
-                                                      orElse: () => null),
-                                              onChanged: (val) {
-                                                setState(() {
-                                                  widget.p.checkableAddons
-                                                      .forEach((element) {
-                                                    element.isSelected = false;
-                                                  });
-                                                  (val as PaidAddon)
-                                                      .isSelected = true;
-                                                });
-                                              },
-                                            ),
-                                            Expanded(
-                                              child: Column(
-                                                children: [
-                                                  Text(
-                                                    e.localizedName[
-                                                            AppLocalizations.of(
-                                                                    context)
-                                                                .locale
-                                                                .languageCode] ??
-                                                        '',
-                                                    style: TextStyle(
-                                                      color: Colors.black54,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      fontSize: 12.0,
-                                                    ),
-                                                  ),
-                                                  if ((e.price ?? 0) > 0)
-                                                    Text(
-                                                      '+${e.price.toString()}₾',
-                                                      style: TextStyle(
-                                                        fontFamily: 'Sans',
-                                                        color: Colors.black54,
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                        fontSize: 12.0,
-                                                      ),
-                                                    ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ))
-                                    ?.toList(),
-                                Text(
-                                  '₾${widget.p.totalProductPrice.toString()}',
-                                  style: TextStyle(
-                                      fontFamily: 'Sans', color: kPrimary),
-                                ),
-                                if (user?.role == UserType.user &&
-                                    ((widget.p.quantityInSupply ?? 0) > 0 ||
-                                        widget.p.quantityInSupply == null))
-                                  child,
-                              ],
-                            );
-                          },
-                          valueListenable: viewModel.databaseUser,
-                          child: CartControl(
-                            product: widget.p,
-                          ),
-                        ),
-//
-                      ),
-                    ),
-                  ],
-                ),
-                ...?widget.p.selectableAddons
-                    ?.map((e) => Stack(
-                          children: [
-                            Row(
-                              children: [
-                                Checkbox(
-                                  activeColor: kPrimary,
-                                  value: e.isSelected,
-                                  onChanged: (val) {
-                                    setState(() {
-                                      e.isSelected = val;
-                                    });
-                                  },
-                                ),
-                                Column(
+                                  )),
+                              if (widget.p.quantityInSupply != null)
+                                Row(
                                   children: [
                                     Text(
-                                      e.localizedName[
-                                              AppLocalizations.of(context)
-                                                  .locale
-                                                  .languageCode] ??
-                                          '',
+                                      '${AppLocalizations.of(context).translate('Quantity in supply')}: ',
+                                      style: TextStyle(
+                                        color: Colors.black54,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12.0,
+                                      ),
+                                    ),
+                                    Text(
+                                      widget.p.quantityInSupply.toString(),
                                       style: TextStyle(
                                         color: Colors.black54,
                                         fontWeight: FontWeight.w500,
                                         fontSize: 12.0,
                                       ),
                                     ),
-                                    if (e.price != null)
+                                  ],
+                                ),
+                              ...?widget.p.checkableAddons
+                                  ?.map((e) => Row(
+                                        children: [
+                                          Radio(
+                                            activeColor: kPrimary,
+                                            value: e,
+                                            groupValue: widget
+                                                ?.p?.checkableAddons
+                                                ?.firstWhere(
+                                                    (element) =>
+                                                        element.isSelected,
+                                                    orElse: () => null),
+                                            onChanged: (val) {
+                                              setState(() {
+                                                widget.p.checkableAddons
+                                                    .forEach((element) {
+                                                  element.isSelected = false;
+                                                });
+                                                (val as PaidAddon).isSelected =
+                                                    true;
+                                              });
+                                            },
+                                          ),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  e.localizedName[
+                                                          AppLocalizations.of(
+                                                                  context)
+                                                              .locale
+                                                              .languageCode] ??
+                                                      '',
+                                                  style: TextStyle(
+                                                    color: Colors.black54,
+                                                    fontWeight: FontWeight.w500,
+                                                    fontSize: 12.0,
+                                                  ),
+                                                ),
+                                                if (e.price != null)
+                                                  Text(
+                                                    '+${e.price.toString()}₾',
+                                                    style: TextStyle(
+                                                      fontFamily: 'Sans',
+                                                      color: Colors.black54,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      fontSize: 12.0,
+                                                    ),
+                                                  ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ))
+                                  ?.toList(),
+                            ],
+                          ),
+//
+                        ),
+                      ),
+                    ],
+                  ),
+                  ...?widget.p.selectableAddons
+                      ?.map((e) => Stack(
+                            children: [
+                              Row(
+                                children: [
+                                  Checkbox(
+                                    activeColor: kPrimary,
+                                    value: e.isSelected,
+                                    onChanged: (val) {
+                                      setState(() {
+                                        e.isSelected = val;
+                                      });
+                                    },
+                                  ),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
                                       Text(
-                                        '+${e.price?.toString() ?? ''}₾',
+                                        e.localizedName[
+                                                AppLocalizations.of(context)
+                                                    .locale
+                                                    .languageCode] ??
+                                            '',
                                         style: TextStyle(
-                                          fontFamily: 'Sans',
                                           color: Colors.black54,
                                           fontWeight: FontWeight.w500,
                                           fontSize: 12.0,
                                         ),
                                       ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ],
-                        ))
-                    ?.toList(),
-                Divider(),
-                Row(
-                  children: [
-                    Text(
-                      AppLocalizations.of(context).translate('Photos'),
-                      style: TextStyle(
-                          fontFamily: "Sofia",
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.w700),
-                      textAlign: TextAlign.justify,
-                    ),
-                    InkWell(
-                        onTap: () {
-                          Navigator.of(context).push(PageRouteBuilder(
-                            opaque: false,
-                            pageBuilder: (BuildContext context, _, __) {
-                              return Scaffold(
-                                appBar: AppBar(
-                                  title: Text(widget.p.localizedName[
-                                          AppLocalizations.of(context)
-                                              .locale
-                                              .languageCode] ??
-                                      ''),
-                                ),
-                                body: Padding(
-                                  padding: const EdgeInsets.only(
-                                      top: 8.0,
-                                      bottom: 5.0,
-                                      left: 5.0,
-                                      right: 5.0),
-                                  child: PageView(
-                                    physics: BouncingScrollPhysics(),
-                                    children: [
-                                      ...?widget.p.images.map((e) => Container(
-                                            decoration: BoxDecoration(
-                                              image: DecorationImage(
-                                                  image: NetworkImage(
-                                                      e.downloadUrl),
-                                                  fit: BoxFit.cover),
-                                            ),
-                                          ))
-                                    ],
-                                    controller: PageController(initialPage: 0),
-                                    scrollDirection: Axis.horizontal,
-                                  ),
-                                ),
-                              );
-                            },
-                          ));
-                        },
-                        child: Text(
-                            AppLocalizations.of(context).translate('See all'),
-                            style: TextStyle(
-                                fontFamily: "Sofia",
-                                fontSize: 15.0,
-                                fontWeight: FontWeight.w300)))
-                  ],
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                ),
-                Container(
-                  height: 140,
-                  child: ListView(
-                    children: [
-                      SizedBox(
-                        width: 10.0,
-                      ),
-                      ...?widget.p.images
-                          .map(
-                            (e) => Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Material(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(10.0)),
-                                    child: InkWell(
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(10.0)),
-                                      onTap: () {
-                                        Navigator.of(context).push(
-                                            PageRouteBuilder(
-                                                opaque: false,
-                                                pageBuilder:
-                                                    (BuildContext context, _,
-                                                        __) {
-                                                  return new Material(
-                                                    color: Colors.black54,
-                                                    child: Container(
-                                                      padding: EdgeInsets.only(
-                                                          left: 5.0,
-                                                          right: 5.0,
-                                                          top: 0.0,
-                                                          bottom: 0.0),
-                                                      child: InkWell(
-                                                        child: Hero(
-                                                            tag:
-                                                                "hero-grid-${e.refPath}",
-                                                            child: Padding(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                          .only(
-                                                                      left: 5.0,
-                                                                      right:
-                                                                          5.0,
-                                                                      top:
-                                                                          160.0,
-                                                                      bottom:
-                                                                          160.0),
-                                                              child: Container(
-                                                                height: 500.0,
-                                                                width: double
-                                                                    .infinity,
-                                                                decoration: BoxDecoration(
-                                                                    borderRadius:
-                                                                        BorderRadius.all(Radius.circular(
-                                                                            10.0)),
-                                                                    image: DecorationImage(
-                                                                        image: NetworkImage(e
-                                                                            .downloadUrl),
-                                                                        fit: BoxFit
-                                                                            .cover)),
-                                                              ),
-                                                            )),
-                                                        onTap: () {
-                                                          Navigator.pop(
-                                                              context);
-                                                        },
-                                                      ),
-                                                    ),
-                                                  );
-                                                },
-                                                transitionDuration: Duration(
-                                                    milliseconds: 500)));
-                                      },
-                                      child: Hero(
-                                        tag: "hero-grid-${e.refPath}",
-                                        child: Container(
-                                          height: 110.0,
-                                          width: 140.0,
-                                          decoration: BoxDecoration(
-                                              image: DecorationImage(
-                                                  image: NetworkImage(
-                                                      e.downloadUrl),
-                                                  fit: BoxFit.cover),
-                                              color: Colors.black12,
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(10.0)),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                    blurRadius: 5.0,
-                                                    color: Colors.black12
-                                                        .withOpacity(0.1),
-                                                    spreadRadius: 2.0)
-                                              ]),
+                                      if (e.price != null)
+                                        Text(
+                                          '+${e.price?.toString() ?? ''}₾',
+                                          style: TextStyle(
+                                            fontFamily: 'Sans',
+                                            color: Colors.black54,
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 12.0,
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: 5.0,
+                                    ],
                                   ),
                                 ],
                               ),
-                            ),
-                          )
-                          .toList(),
+                            ],
+                          ))
+                      ?.toList(),
+                  Text(
+                    '₾${widget.p.totalProductPrice.toString()}',
+                    style: TextStyle(fontFamily: 'Sans', color: kPrimary),
+                    textAlign: TextAlign.right,
+                  ),
+                  if (user?.role == UserType.user &&
+                      ((widget.p.quantityInSupply ?? 0) > 0 ||
+                          widget.p.quantityInSupply == null))
+                    CartControl(
+                      product: widget.p,
+                    ),
+                  Divider(),
+                  Row(
+                    children: [
+                      Text(
+                        AppLocalizations.of(context).translate('Photos'),
+                        style: TextStyle(
+                            fontFamily: "Sofia",
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.w700),
+                        textAlign: TextAlign.justify,
+                      ),
+                      InkWell(
+                          onTap: () {
+                            Navigator.of(context).push(PageRouteBuilder(
+                              opaque: false,
+                              pageBuilder: (BuildContext context, _, __) {
+                                return Scaffold(
+                                  appBar: AppBar(
+                                    title: Text(widget.p.localizedName[
+                                            AppLocalizations.of(context)
+                                                .locale
+                                                .languageCode] ??
+                                        ''),
+                                  ),
+                                  body: Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 8.0,
+                                        bottom: 5.0,
+                                        left: 5.0,
+                                        right: 5.0),
+                                    child: PageView(
+                                      physics: BouncingScrollPhysics(),
+                                      children: [
+                                        ...?widget.p.images
+                                            .map((e) => Container(
+                                                  decoration: BoxDecoration(
+                                                    image: DecorationImage(
+                                                        image: NetworkImage(
+                                                            e.downloadUrl),
+                                                        fit: BoxFit.cover),
+                                                  ),
+                                                ))
+                                      ],
+                                      controller:
+                                          PageController(initialPage: 0),
+                                      scrollDirection: Axis.horizontal,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ));
+                          },
+                          child: Text(
+                              AppLocalizations.of(context).translate('See all'),
+                              style: TextStyle(
+                                  fontFamily: "Sofia",
+                                  fontSize: 15.0,
+                                  fontWeight: FontWeight.w300)))
                     ],
-                    scrollDirection: Axis.horizontal,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(
-                      top: 30.0, left: 20.0, right: 20.0, bottom: 50.0),
-                  child: Text(
-                    widget.p.localizedDescription[
-                            AppLocalizations.of(context).locale.languageCode] ??
-                        '',
-                    style: TextStyle(
-                        fontFamily: "Sofia",
-                        color: Colors.black54,
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w400),
-                    textAlign: TextAlign.justify,
+                  Container(
+                    height: 140,
+                    child: ListView(
+                      children: [
+                        SizedBox(
+                          width: 10.0,
+                        ),
+                        ...?widget.p.images
+                            .map(
+                              (e) => Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Material(
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(10.0)),
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(10.0)),
+                                        onTap: () {
+                                          Navigator.of(context).push(
+                                              PageRouteBuilder(
+                                                  opaque: false,
+                                                  pageBuilder:
+                                                      (BuildContext context, _,
+                                                          __) {
+                                                    return new Material(
+                                                      color: Colors.black54,
+                                                      child: Container(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 5.0,
+                                                                right: 5.0,
+                                                                top: 0.0,
+                                                                bottom: 0.0),
+                                                        child: InkWell(
+                                                          child: Hero(
+                                                              tag:
+                                                                  "hero-grid-${e.refPath}",
+                                                              child: Padding(
+                                                                padding: const EdgeInsets
+                                                                        .only(
+                                                                    left: 5.0,
+                                                                    right: 5.0,
+                                                                    top: 160.0,
+                                                                    bottom:
+                                                                        160.0),
+                                                                child:
+                                                                    Container(
+                                                                  height: 500.0,
+                                                                  width: double
+                                                                      .infinity,
+                                                                  decoration: BoxDecoration(
+                                                                      borderRadius:
+                                                                          BorderRadius.all(Radius.circular(
+                                                                              10.0)),
+                                                                      image: DecorationImage(
+                                                                          image: NetworkImage(e
+                                                                              .downloadUrl),
+                                                                          fit: BoxFit
+                                                                              .cover)),
+                                                                ),
+                                                              )),
+                                                          onTap: () {
+                                                            Navigator.pop(
+                                                                context);
+                                                          },
+                                                        ),
+                                                      ),
+                                                    );
+                                                  },
+                                                  transitionDuration: Duration(
+                                                      milliseconds: 500)));
+                                        },
+                                        child: Hero(
+                                          tag: "hero-grid-${e.refPath}",
+                                          child: Container(
+                                            height: 110.0,
+                                            width: 140.0,
+                                            decoration: BoxDecoration(
+                                                image: DecorationImage(
+                                                    image: NetworkImage(
+                                                        e.downloadUrl),
+                                                    fit: BoxFit.cover),
+                                                color: Colors.black12,
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(10.0)),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                      blurRadius: 5.0,
+                                                      color: Colors.black12
+                                                          .withOpacity(0.1),
+                                                      spreadRadius: 2.0)
+                                                ]),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 5.0,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ],
+                      scrollDirection: Axis.horizontal,
+                    ),
                   ),
-                ),
-              ],
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        top: 30.0, left: 20.0, right: 20.0, bottom: 50.0),
+                    child: Text(
+                      widget.p.localizedDescription[AppLocalizations.of(context)
+                              .locale
+                              .languageCode] ??
+                          '',
+                      style: kDescriptionTextStyle,
+                      textAlign: TextAlign.justify,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

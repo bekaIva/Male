@@ -597,7 +597,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                                   }
                                 }
                                 catch(e){
-print(e);
+print(e.toString());
                                 }
                                 finally
                                 {
@@ -628,9 +628,14 @@ print(e);
                           ],
                         ),
                       ),
+                      if(order.orderMessage!=null)Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(order.orderMessage,style: kDescriptionTextStyle,textAlign: TextAlign.center,),
+                      ),
                       DeliveryStatusSteps(
                         order: order,
                       ),
+
 if(databaseUser?.role==UserType.admin) FlatButton(child: Text(AppLocalizations.of(context).translate('Export pdf')),onPressed: ()async {
  try{
    var res = await exportInvoice(pageFormat: PdfPageFormat.a4,order: order,bContext: context);
@@ -978,54 +983,58 @@ class OrderedProductWidget extends StatelessWidget {
                   fontSize: 12.0,
                 ),
               ),
-              if (product.checkableAddons?.firstWhere(
-                      (element) => element.isSelected,
-                  orElse: () => null) !=
+              if (product.checkedAddon !=
                   null)
-                Row(
+                Column(
                   children: [
-                    Text(
-                      '${product.checkableAddons.firstWhere((element) => element.isSelected, orElse: () => null).localizedName[AppLocalizations.of(context).locale.languageCode]}: ',
-                      style: TextStyle(
-                        color: Colors.black54,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 12.0,
-                      ),
-                    ),
-                    Text(
-                      '${product.checkableAddons.firstWhere((element) => element.isSelected, orElse: () => null).price}₾',
-                      style: TextStyle(fontFamily: 'Sans',
-                        color: Colors.black54,
-                        fontSize: 12.0,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          '${product.checkedAddon.localizedName[AppLocalizations.of(context).locale.languageCode]??''}',
+                          style: TextStyle(
+                            color: Colors.black54,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 12.0,
+                          ),
+                        ),
+                        if(product.checkedAddon?.price!=null)
+                        Text(
+                          ': +${product.checkedAddon.price}₾',
+                          style: kSmallHeader,
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ...?product.selectableAddons
-                  ?.where((element) => element.isSelected)
-                  ?.map(
-                    (e) => Row(
-                  children: [
-                    Text(
-                      '${e.localizedName[AppLocalizations.of(context).locale.languageCode]}: ',
-                      style: TextStyle(
-                        color: Colors.black54,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 12.0,
-                      ),
-                    ),
-                    if ((e.price ?? 0) > 0)
+              if((product.selectedSelectableAddons?.length??0)>0)Column(children: [
+                Divider(),
+                Text(
+                  AppLocalizations.of(context)
+                      .translate('Addons'),
+                  style: kSmallHeader,
+                ),
+                ...?product.selectedSelectableAddons
+                    ?.map(
+                      (e) => Row(
+                    children: [
                       Text(
-                        '${e.price}₾',
+                        '${e.localizedName[AppLocalizations.of(context).locale.languageCode]}',
                         style: TextStyle(
-                          fontFamily: 'Sans',
                           color: Colors.black54,
+                          fontWeight: FontWeight.w500,
                           fontSize: 12.0,
                         ),
                       ),
-                  ],
+                      if (e.price!=null)
+                        Text(
+                          ': +${e.price}₾',
+                          style: kSmallHeader,
+                        ),
+                    ],
+                  ),
                 ),
-              ),
+              ],),
+
 
               Text(
                 '₾${product.totalProductPrice.toString()}',

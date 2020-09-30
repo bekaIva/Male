@@ -40,7 +40,7 @@ class _AddressesListState extends State<AddressesList> {
             ),
             Expanded(
               child: Text(
-                e.addressName,
+                e.addressName ?? '',
                 style: TextStyle(color: Colors.black54),
               ),
             )

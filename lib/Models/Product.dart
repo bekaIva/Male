@@ -1,10 +1,15 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:male/Localizations/app_localizations.dart';
+import 'package:male/Uitls/Utils.dart';
 
 import 'FirestoreImage.dart';
 
 class Product {
+  List<PaidAddon> get selectedSelectableAddons =>
+      selectableAddons?.where((element) => element.isSelected)?.toList();
+  PaidAddon get checkedAddon => checkableAddons
+      ?.firstWhere((element) => element.isSelected, orElse: () => null);
   double get totalProductPrice => double.parse(((this.basePrice ?? 0) +
           (selectableAddons
                   ?.where((element) => element.isSelected)
@@ -65,11 +70,6 @@ class Product {
       'Description':
           '${nullSafeMapValue(localizedDescription, AppLocalizations.of(context).locale.languageCode) ?? ''} ${nullSafeMapValue(selectableAddons?.firstWhere((element) => element.isSelected, orElse: () => null)?.localizedName, AppLocalizations.of(context).locale.languageCode) ?? ''} ${(checkableAddons?.where((element) => element.isSelected)?.fold('', (previousValue, element) => previousValue + nullSafeMapValue(element?.localizedName, AppLocalizations.of(context).locale.languageCode)) ?? '')}',
     };
-  }
-
-  V nullSafeMapValue<K, V>(Map<K, V> map, K key) {
-    if (map?.containsKey(key) ?? false) return map[key];
-    return null;
   }
 
   Product.fromJson(Map<String, dynamic> json) {

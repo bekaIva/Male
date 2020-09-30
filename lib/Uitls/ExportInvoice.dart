@@ -530,7 +530,10 @@ class Invoice {
                   return products[row].localizedName[
                       AppLocalizations.of(bContext).locale.languageCode];
                 case 1:
-                  return '${products[row].localizedDescription[AppLocalizations.of(bContext).locale.languageCode] ?? ''} ${products[row].addonDescriptions.fold('', (previousValue, element) => previousValue + '${element.localizedAddonDescriptionName[AppLocalizations.of(bContext).locale.languageCode]}: ${element.localizedAddonDescription[AppLocalizations.of(bContext).locale.languageCode]}')}\n${products[row].checkableAddons?.where((element) => element.isSelected)?.fold('', (previousValue, element) => previousValue + element.localizedName[AppLocalizations.of(bContext).locale.languageCode] + ': ' + '+${element.price ?? ''}₾, \n') ?? ''}${products[row].selectableAddons?.where((element) => element.isSelected)?.fold('', (previousValue, element) => previousValue + element.localizedName[AppLocalizations.of(bContext).locale.languageCode] + ': ' + '+${element.price ?? '0'}₾ \n') ?? ''}';
+                  return '${products[row].localizedDescription[AppLocalizations.of(bContext).locale.languageCode] ?? ''}'
+                      ' ${products[row].addonDescriptions?.fold('', (previousValue, element) => previousValue + '${element.localizedAddonDescriptionName[AppLocalizations.of(bContext).locale.languageCode]}: '
+                          '${element.localizedAddonDescription[AppLocalizations.of(bContext).locale.languageCode]}')}'
+                      '${products[row].checkedAddon?.localizedName != null ? '\n' + products[row].checkedAddon?.localizedName[AppLocalizations.of(bContext).locale.languageCode] : ''} ${products[row].checkedAddon?.price != null ? ' +${products[row].checkedAddon?.price}₾' : ''} \n${products[row].selectedSelectableAddons?.fold('', (previousValue, element) => previousValue + element.localizedName[AppLocalizations.of(bContext).locale.languageCode] + '${element?.price != null ? ' +${element.price}₾' : ''}\n') ?? ''}';
                 case 2:
                   return (products[row].quantity ?? 1).toString();
                 case 3:

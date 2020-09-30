@@ -5,6 +5,7 @@ import 'package:male/Models/Product.dart';
 import 'package:male/Models/enums.dart';
 
 class Order {
+  String orderMessage;
   Map<DeliveryStatus, DeliveryStatusStep> deliveryStatusSteps;
   String TransactionID;
   String Hash;
@@ -20,6 +21,7 @@ class Order {
   dynamic serverTime;
   Order(
       {this.paymentMethod,
+      this.orderMessage,
       this.deliveryStatusSteps,
       this.orderId,
       this.paymentStatus = PaymentStatus.NotPaid,
@@ -33,6 +35,7 @@ class Order {
       this.Hash,
       this.TransactionID});
   Order.fromJson(Map<String, dynamic> json) {
+    orderMessage = json['orderMessage'] as String;
     TransactionID = json['TransactionID'] as String;
     Hash = json['Hash'] as String;
     deliveryStatusSteps = (json['deliveryStatusSteps'] as Map<String, dynamic>)
@@ -55,6 +58,7 @@ class Order {
   }
   Map<String, dynamic> toJson() {
     return {
+      'orderMessage': orderMessage,
       'TransactionID': TransactionID,
       'Hash': Hash,
       'deliveryStatusSteps': deliveryStatusSteps.map(

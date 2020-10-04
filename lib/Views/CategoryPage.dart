@@ -15,6 +15,7 @@ import 'package:male/Models/Product.dart';
 import 'package:male/Models/Settings.dart';
 import 'package:male/Models/User.dart';
 import 'package:male/Models/enums.dart';
+import 'package:male/Uitls/Utils.dart';
 import 'package:male/ViewModels/MainViewModel.dart';
 import 'package:male/Views/ProductPage.dart';
 import 'package:male/Widgets/CategoryItemWidget.dart';
@@ -153,10 +154,10 @@ class _CategoryPageState extends State<CategoryPage> {
                                           viewModel.categories.value.length,
                                       itemBuilder: (context, index) {
                                         return Slidable(
-                                          key: Key(viewModel.categories
-                                                  .value[index].localizedName[
-                                              AppLocalizations
-                                                  .supportedLocales.first]),
+                                          key: Key(getLocalizedName(
+                                              viewModel.categories.value[index]
+                                                  .localizedName,
+                                              context)),
                                           actionPane:
                                               SlidableDrawerActionPane(),
                                           actions: <Widget>[

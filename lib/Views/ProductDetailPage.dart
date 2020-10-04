@@ -5,6 +5,7 @@ import 'package:male/Models/CartItem.dart';
 import 'package:male/Models/Product.dart';
 import 'package:male/Models/User.dart';
 import 'package:male/Models/enums.dart';
+import 'package:male/Uitls/Utils.dart';
 import 'package:male/ViewModels/MainViewModel.dart';
 import 'package:male/Views/CartPage.dart';
 import 'package:male/Widgets/Widgets.dart';
@@ -24,9 +25,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     return Consumer<MainViewModel>(
       builder: (context, viewModel, child) => Scaffold(
         appBar: AppBar(
-          title: Text(widget.p.localizedName[
-                  AppLocalizations.of(context).locale.languageCode] ??
-              ''),
+          title: Text(getLocalizedName(widget.p.localizedName, context)),
           actions: [
             ValueListenableBuilder<List<CartItem>>(
               valueListenable: viewModel.cart,
@@ -127,15 +126,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Text(
-                                widget.p.localizedName[
-                                        AppLocalizations.of(context)
-                                            .locale
-                                            .languageCode] ??
-                                    '',
-                                style: TextStyle(
-                                    fontFamily: "Sans",
-                                    color: Colors.black87,
-                                    fontWeight: FontWeight.w700),
+                                getLocalizedName(
+                                    widget.p.localizedName, context),
+                                style: kProductNameTextStyle,
                               ),
                               SizedBox(
                                 height: 4,
@@ -147,12 +140,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                     children: [
                                       Flexible(
                                         child: Text(
-                                          '${e.localizedAddonDescriptionName[AppLocalizations.of(context).locale.languageCode] ?? ''}: ',
-                                          style: TextStyle(
-                                            color: Colors.black54,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 12.0,
-                                          ),
+                                          '${getLocalizedName(e.localizedAddonDescriptionName, context)}',
+                                          style: kDescriptionHeaderTextStyle,
                                         ),
                                       ),
                                       VerticalDivider(
@@ -160,12 +149,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                       ),
                                       Flexible(
                                         child: Text(
-                                          '${e.localizedAddonDescription[AppLocalizations.of(context).locale.languageCode] ?? ''}',
-                                          style: TextStyle(
-                                            color: Colors.black54,
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: 12.0,
-                                          ),
+                                          '${getLocalizedName(e.localizedAddonDescription, context)}',
+                                          style: kDescriptionTextStyle,
                                         ),
                                       ),
                                     ],
@@ -197,12 +182,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                           Radio(
                                             activeColor: kPrimary,
                                             value: e,
-                                            groupValue: widget
-                                                ?.p?.checkableAddons
-                                                ?.firstWhere(
-                                                    (element) =>
-                                                        element.isSelected,
-                                                    orElse: () => null),
+                                            groupValue: widget?.p?.checkedAddon,
                                             onChanged: (val) {
                                               setState(() {
                                                 widget.p.checkableAddons
@@ -220,28 +200,16 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  e.localizedName[
-                                                          AppLocalizations.of(
-                                                                  context)
-                                                              .locale
-                                                              .languageCode] ??
-                                                      '',
-                                                  style: TextStyle(
-                                                    color: Colors.black54,
-                                                    fontWeight: FontWeight.w500,
-                                                    fontSize: 12.0,
-                                                  ),
+                                                  getLocalizedName(
+                                                      e.localizedName, context),
+                                                  style: kDescriptionTextStyle
+                                                      .copyWith(
+                                                          color: kPrimary),
                                                 ),
                                                 if (e.price != null)
                                                   Text(
                                                     '+${e.price.toString()}₾',
-                                                    style: TextStyle(
-                                                      fontFamily: 'Sans',
-                                                      color: Colors.black54,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      fontSize: 12.0,
-                                                    ),
+                                                    style: kAddonPriceTextStyle,
                                                   ),
                                               ],
                                             ),
@@ -275,16 +243,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        e.localizedName[
-                                                AppLocalizations.of(context)
-                                                    .locale
-                                                    .languageCode] ??
-                                            '',
-                                        style: TextStyle(
-                                          color: Colors.black54,
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 12.0,
-                                        ),
+                                        getLocalizedName(
+                                            e.localizedName, context),
+                                        style: kDescriptionTextStyle,
                                       ),
                                       if (e.price != null)
                                         Text(
@@ -305,7 +266,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       ?.toList(),
                   Text(
                     '₾${widget.p.totalProductPrice.toString()}',
-                    style: TextStyle(fontFamily: 'Sans', color: kPrimary),
+                    style: kPriceTextStyle,
                     textAlign: TextAlign.right,
                   ),
                   if (user?.role == UserType.user &&
@@ -332,11 +293,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               pageBuilder: (BuildContext context, _, __) {
                                 return Scaffold(
                                   appBar: AppBar(
-                                    title: Text(widget.p.localizedName[
-                                            AppLocalizations.of(context)
-                                                .locale
-                                                .languageCode] ??
-                                        ''),
+                                    title: Text(getLocalizedName(
+                                        widget.p.localizedName, context)),
                                   ),
                                   body: Padding(
                                     padding: const EdgeInsets.only(
@@ -491,12 +449,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     padding: const EdgeInsets.only(
                         top: 30.0, left: 20.0, right: 20.0, bottom: 50.0),
                     child: Text(
-                      widget.p.localizedDescription[AppLocalizations.of(context)
-                              .locale
-                              .languageCode] ??
-                          '',
+                      getLocalizedName(widget.p.localizedDescription, context),
                       style: kDescriptionTextStyle,
-                      textAlign: TextAlign.justify,
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 ],

@@ -16,6 +16,7 @@ import 'package:male/Models/Product.dart';
 import 'package:male/Models/Settings.dart';
 import 'package:male/Models/User.dart';
 import 'package:male/Models/enums.dart';
+import 'package:male/Uitls/Utils.dart';
 import 'package:male/ViewModels/MainViewModel.dart';
 import 'package:male/Views/UnipayCheckoutPage.dart';
 import 'package:male/Widgets/AddressesList.dart';
@@ -549,44 +550,33 @@ class _CartItemWidgetState extends State<CartItemWidget> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             Text(
-                              widget.p.product.localizedName[
-                                      AppLocalizations.of(context)
-                                          .locale
-                                          .languageCode] ??
-                                  '',
-                              style: TextStyle(
-                                  fontFamily: "Sans",
-                                  color: Colors.black87,
-                                  fontWeight: FontWeight.w700),
-                            ),
-                            ...?widget.p.product.addonDescriptions
-                                .map((e) => Row(
-                                      children: [
-                                        Flexible(
-                                          child: Text(
-                                            '${e.localizedAddonDescriptionName[AppLocalizations.of(context).locale.languageCode] ?? ''}: ',
-                                            style: TextStyle(
-                                              color: Colors.black54,
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 12.0,
-                                            ),
-                                          ),
-                                        ),
-                                        VerticalDivider(
-                                          width: 4,
-                                        ),
-                                        Flexible(
-                                          child: Text(
-                                            '${e.localizedAddonDescription[AppLocalizations.of(context).locale.languageCode] ?? ''}',
-                                            style: TextStyle(
-                                              color: Colors.black54,
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 12.0,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    )),
+                                getLocalizedName(
+                                    widget.p.product.localizedName, context),
+                                style: kProductNameTextStyle),
+                            ...?widget.p.product.addonDescriptions.map((e) =>
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    SizedBox(
+                                      height: 4,
+                                    ),
+                                    Flexible(
+                                      child: Text(
+                                          '${getLocalizedName(e.localizedAddonDescriptionName, context)}',
+                                          style: kDescriptionHeaderTextStyle),
+                                    ),
+                                    VerticalDivider(
+                                      width: 4,
+                                    ),
+                                    Flexible(
+                                      child: Text(
+                                        '${getLocalizedName(e.localizedAddonDescription, context)}',
+                                        style: kDescriptionTextStyle,
+                                      ),
+                                    ),
+                                  ],
+                                )),
                             ...?widget.p.product.checkableAddons
                                 ?.map((e) => Row(
                                       children: [
@@ -613,12 +603,8 @@ class _CartItemWidgetState extends State<CartItemWidget> {
                                           child: Column(
                                             children: [
                                               Text(
-                                                e.localizedName[
-                                                        AppLocalizations.of(
-                                                                context)
-                                                            .locale
-                                                            .languageCode] ??
-                                                    '',
+                                                getLocalizedName(
+                                                    e.localizedName, context),
                                                 style: TextStyle(
                                                   color: Colors.black54,
                                                   fontWeight: FontWeight.w500,
@@ -641,17 +627,8 @@ class _CartItemWidgetState extends State<CartItemWidget> {
                                       ],
                                     ))
                                 ?.toList(),
-                            Text(
-                              widget.p.product.localizedDescription[
-                                      AppLocalizations.of(context)
-                                          .locale
-                                          .languageCode] ??
-                                  '',
-                              style: TextStyle(
-                                color: Colors.black54,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 12.0,
-                              ),
+                            SizedBox(
+                              height: 4,
                             ),
                             ...?widget.p.product.selectableAddons
                                 ?.map((e) => Stack(
@@ -669,27 +646,22 @@ class _CartItemWidgetState extends State<CartItemWidget> {
                                             Column(
                                               children: [
                                                 Text(
-                                                  e.localizedName[
-                                                          AppLocalizations.of(
-                                                                  context)
-                                                              .locale
-                                                              .languageCode] ??
-                                                      '',
-                                                  style: TextStyle(
-                                                    color: Colors.black54,
-                                                    fontWeight: FontWeight.w500,
-                                                    fontSize: 12.0,
+                                                    getLocalizedName(
+                                                        e.localizedName,
+                                                        context),
+                                                    style:
+                                                        kDescriptionTextStyle),
+                                                if (e.price != null)
+                                                  Text(
+                                                    '+${e.price?.toString() ?? ''}₾',
+                                                    style: TextStyle(
+                                                      fontFamily: 'Sans',
+                                                      color: Colors.black54,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      fontSize: 12.0,
+                                                    ),
                                                   ),
-                                                ),
-                                                Text(
-                                                  '+${e.price?.toString() ?? ''}₾',
-                                                  style: TextStyle(
-                                                    fontFamily: 'Sans',
-                                                    color: Colors.black54,
-                                                    fontWeight: FontWeight.w500,
-                                                    fontSize: 12.0,
-                                                  ),
-                                                ),
                                               ],
                                             ),
                                           ],
@@ -698,9 +670,17 @@ class _CartItemWidgetState extends State<CartItemWidget> {
                                     ))
                                 ?.toList(),
                             Text(
-                              '₾${widget.p.product.totalProductPrice?.toString() ?? '0'}',
-                              style: TextStyle(
-                                  fontFamily: 'Sans', color: kPrimary),
+                              getLocalizedName(
+                                  widget.p.product.localizedDescription,
+                                  context),
+                              style: kDescriptionTextStyle,
+                            ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Text(
+                                '₾${widget.p.product.totalProductPrice?.toString() ?? '0'}',
+                                style: kPriceTextStyle,
+                              ),
                             ),
                             if (user?.role == UserType.user) child,
                           ],

@@ -54,5 +54,23 @@ const TextStyle kContentStyle = TextStyle(
 const TextStyle kDescriptionTextStyle = TextStyle(
     fontFamily: "Sofia",
     color: Colors.black54,
-    fontSize: 16.0,
+    fontSize: 14.0,
     fontWeight: FontWeight.w400);
+const TextStyle kDescriptionHeaderTextStyle = TextStyle(
+    fontFamily: "Sofia",
+    color: Colors.black54,
+    fontSize: 15.0,
+    fontWeight: FontWeight.w700);
+const TextStyle kProductNameTextStyle = TextStyle(
+    fontFamily: "Sans",
+    color: Colors.black87,
+    fontSize: 18,
+    fontWeight: FontWeight.w700);
+
+const TextStyle kAddonPriceTextStyle = TextStyle(
+    fontFamily: "Sans",
+    color: Colors.black54,
+    fontSize: 12,
+    fontWeight: FontWeight.w600);
+const TextStyle kPriceTextStyle =
+    TextStyle(color: kPrimary, fontFamily: 'Sans');

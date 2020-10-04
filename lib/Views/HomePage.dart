@@ -62,12 +62,12 @@ class _HomePageState extends State<HomePage> {
                       items: [
                         BottomNavigationBarItem(
                             icon: Icon(Icons.category),
-                            title: Text(AppLocalizations.of(context)
-                                .translate('Categories'))),
+                            label: AppLocalizations.of(context)
+                                .translate('Categories')),
                         BottomNavigationBarItem(
                             icon: Icon(FontAwesome.list),
-                            title: Text(AppLocalizations.of(context)
-                                .translate('Orders'))),
+                            label: AppLocalizations.of(context)
+                                .translate('Orders')),
                         BottomNavigationBarItem(
                             icon: ValueListenableBuilder(
                               valueListenable: mainvViewModel.cart,
@@ -120,8 +120,8 @@ class _HomePageState extends State<HomePage> {
                                 );
                               },
                             ),
-                            title: Text(AppLocalizations.of(context)
-                                .translate('Cart'))),
+                            label:
+                                AppLocalizations.of(context).translate('Cart')),
                       ],
                     );
                   },
@@ -815,6 +815,11 @@ class CategorySearch extends SearchDelegate<String> {
                                   padding: EdgeInsets.only(
                                       left: 30, right: 8, top: 4, bottom: 4),
                                   child: ProductItem(
+                                    cartControl: user.role == UserType.user
+                                        ? CartControl(
+                                            product: e,
+                                          )
+                                        : null,
                                     p: e,
                                   ),
                                 )),

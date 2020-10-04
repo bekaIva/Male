@@ -16,6 +16,7 @@ import 'package:male/Models/FirestoreImage.dart';
 import 'package:male/Models/Product.dart';
 import 'package:male/Models/User.dart';
 import 'package:male/Models/enums.dart';
+import 'package:male/Uitls/Utils.dart';
 import 'package:male/ViewModels/MainViewModel.dart';
 import 'package:male/Views/ProductDetailPage.dart';
 import 'package:male/Widgets/Widgets.dart';
@@ -53,11 +54,8 @@ class _ProductPageState extends State<ProductPage> {
       builder: (BuildContext context, MainViewModel viewModel, Widget child) {
         return Scaffold(
           appBar: AppBar(
-            title: Text(widget.category.localizedName[
-                    AppLocalizations.of(context).locale.languageCode] ??
-                widget.category
-                    .localizedName[AppLocalizations.supportedLocales.first] ??
-                ''),
+            title:
+                Text(getLocalizedName(widget.category.localizedName, context)),
             actions: <Widget>[
               IconButton(
                 icon: Icon(Icons.search),
@@ -696,15 +694,9 @@ class _ProductItemState extends State<ProductItem> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
                                     Text(
-                                      widget.p.localizedName[
-                                              AppLocalizations.of(context)
-                                                  .locale
-                                                  .languageCode] ??
-                                          '',
-                                      style: TextStyle(
-                                          fontFamily: "Sans",
-                                          color: Colors.black87,
-                                          fontWeight: FontWeight.w700),
+                                      getLocalizedName(
+                                          widget.p.localizedName, context),
+                                      style: kProductNameTextStyle,
                                     ),
                                     SizedBox(
                                       height: 4,
@@ -717,18 +709,17 @@ class _ProductItemState extends State<ProductItem> {
                                               children: [
                                                 Flexible(
                                                   child: Text(
-                                                    '${e.localizedAddonDescriptionName[AppLocalizations.of(context).locale.languageCode] ?? ''}',
-                                                    style: kContentStyle,
+                                                    '${getLocalizedName(e.localizedAddonDescriptionName, context)}',
+                                                    style:
+                                                        kDescriptionHeaderTextStyle,
                                                   ),
                                                 ),
                                                 Flexible(
                                                   child: Text(
-                                                    '${e.localizedAddonDescription[AppLocalizations.of(context).locale.languageCode] ?? ''}',
-                                                    style: kContentStyle,
+                                                    '${getLocalizedName(e.localizedAddonDescription, context)}',
+                                                    style:
+                                                        kDescriptionTextStyle,
                                                   ),
-                                                ),
-                                                Divider(
-                                                  height: 2,
                                                 ),
                                               ],
                                             )),
@@ -746,90 +737,46 @@ class _ProductItemState extends State<ProductItem> {
                                           ),
                                         ],
                                       ),
-                                    if (widget.p?.checkableAddons?.firstWhere(
-                                            (element) => element.isSelected,
-                                            orElse: () => null) !=
-                                        null)
-                                      Row(
-                                        children: [
-                                          Text(
-                                            '${widget.p.checkableAddons.firstWhere((element) => element.isSelected, orElse: () => null).localizedName[AppLocalizations.of(context).locale.languageCode] ?? ''} ',
-                                            style: kContentStyle,
-                                          ),
-                                          Text(
-                                            () {
-                                              var p = widget.p.checkableAddons
-                                                  .firstWhere(
-                                                      (element) =>
-                                                          element.isSelected,
-                                                      orElse: () => null);
-                                              if (p?.price != null)
-                                                return '+${p.price.toString()}₾';
-                                              else
-                                                return '';
-                                            }(),
-                                            // '${widget.p.checkableAddons.firstWhere((element) => element.isSelected, orElse: () => null)?.price ?? ''}₾',
-                                            style: kSmallHeader,
-                                          ),
-                                        ],
-                                      ),
-                                    if ((widget?.p?.selectableAddons
-                                                ?.where((element) =>
-                                                    element.isSelected)
-                                                ?.length ??
-                                            0) >
-                                        0)
+                                    if (widget.p?.checkedAddon != null)
                                       Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          SizedBox(
-                                            height: 2,
-                                          ),
-                                          Text(
-                                            AppLocalizations.of(context)
-                                                .translate('Addons'),
-                                            style: TextStyle(
-                                              color: Colors.black54,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12.0,
-                                            ),
-                                          ),
-                                          ...?widget?.p?.selectableAddons
-                                              ?.where((element) =>
-                                                  element.isSelected)
-                                              ?.map(
-                                                (e) => Row(
-                                                  children: [
-                                                    Flexible(
-                                                      fit: FlexFit.tight,
-                                                      child: Text(
-                                                        '${e.localizedName[AppLocalizations.of(context).locale.languageCode] ?? ''} ',
-                                                        style: TextStyle(
-                                                          color: Colors.black54,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                          fontSize: 12.0,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    if (e.price != null)
-                                                      Text(
-                                                        '${e.price ?? 0}₾',
-                                                        style: TextStyle(
-                                                          fontFamily: 'Sans',
-                                                          color: Colors.black54,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                          fontSize: 12.0,
-                                                        ),
-                                                      ),
-                                                    SizedBox(
-                                                      width: 2,
-                                                    )
-                                                  ],
-                                                ),
+                                          Divider(),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                '${getLocalizedName(widget.p.checkedAddon?.localizedName, context)} ',
+                                                style: kDescriptionTextStyle
+                                                    .copyWith(color: kPrimary),
                                               ),
+                                              Text(
+                                                () {
+                                                  var p = widget.p.checkedAddon;
+                                                  if (p?.price != null)
+                                                    return '+${p.price.toString()}₾';
+                                                  else
+                                                    return '';
+                                                }(),
+                                                // '${widget.p.checkableAddons.firstWhere((element) => element.isSelected, orElse: () => null)?.price ?? ''}₾',
+                                                style: kAddonPriceTextStyle,
+                                              ),
+                                            ],
+                                          ),
                                         ],
                                       ),
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Text(
+                                        '₾${widget.p?.totalProductPrice?.toString()}',
+                                        textAlign: TextAlign.right,
+                                        style: kPriceTextStyle,
+                                      ),
+                                    ),
+                                    if (widget.cartControl != null &&
+                                        ((widget.p.quantityInSupply ?? 0) > 0 ||
+                                            widget.p.quantityInSupply == null))
+                                      widget.cartControl,
                                   ],
                                 ),
 //
@@ -837,43 +784,24 @@ class _ProductItemState extends State<ProductItem> {
                             ),
                           ],
                         ),
-                        if ((widget
-                                    .p
-                                    .localizedDescription[
-                                        AppLocalizations.of(context)
-                                            .locale
-                                            .languageCode]
+                        if ((getLocalizedName(
+                                        widget.p.localizedDescription, context)
                                     ?.length ??
                                 0) >
                             0)
                           Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               Divider(),
                               Text(
-                                widget.p.localizedDescription[
-                                        AppLocalizations.of(context)
-                                            .locale
-                                            .languageCode] ??
-                                    '',
+                                getLocalizedName(
+                                    widget.p.localizedDescription, context),
                                 maxLines: null,
                                 textAlign: TextAlign.left,
-                                style: TextStyle(
-                                  color: Colors.black54,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 12.0,
-                                ),
+                                style: kDescriptionTextStyle,
                               ),
                             ],
                           ),
-                        Text(
-                          '₾${widget.p?.totalProductPrice?.toString()}',
-                          textAlign: TextAlign.right,
-                          style: TextStyle(color: kPrimary, fontFamily: 'Sans'),
-                        ),
-                        if (widget.cartControl != null &&
-                            ((widget.p.quantityInSupply ?? 0) > 0 ||
-                                widget.p.quantityInSupply == null))
-                          widget.cartControl,
                       ],
                     ),
                   ),
@@ -1592,8 +1520,7 @@ class ProductsSearch extends SearchDelegate<String> {
     final List<Product> suggestionList = query.isEmpty
         ? products.take(products.length).toList()
         : products
-            .where((element) => element
-                .localizedName[AppLocalizations.of(context).locale.languageCode]
+            .where((element) => getLocalizedName(element.localizedName, context)
                 ?.contains(query))
             .toList();
     suggestionList.sort((a, b) => (a?.order ?? 0) - (b?.order ?? 0));
@@ -1778,7 +1705,12 @@ class ProductsSearch extends SearchDelegate<String> {
                 ...suggestionList.map(
                   (e) => Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: ProductItem(p: e),
+                    child: ProductItem(
+                      p: e,
+                      cartControl: CartControl(
+                        product: e,
+                      ),
+                    ),
                   ),
                 ),
               ],

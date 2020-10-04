@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:male/Constants/Constants.dart';
-import 'package:male/Localizations/app_localizations.dart';
 import 'package:male/Models/Category.dart';
+import 'package:male/Uitls/Utils.dart';
 
 class CategoryWidget extends StatelessWidget {
   final Function onUpPress;
@@ -51,12 +51,7 @@ class CategoryWidget extends StatelessWidget {
                     onPressed: onCategoryPress,
                     child: Center(
                       child: Text(
-                        category.localizedName[AppLocalizations.of(context)
-                                .locale
-                                .languageCode] ??
-                            category.localizedName[
-                                AppLocalizations.supportedLocales.first] ??
-                            '',
+                        getLocalizedName(category.localizedName, context),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           shadows: [

@@ -1,8 +1,8 @@
 import 'dart:async';
-
+import 'package:geolocator/geolocator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:male/Constants/Constants.dart';
 import 'package:male/Localizations/app_localizations.dart';
@@ -22,15 +22,28 @@ class AddAddressPage extends StatelessWidget {
   ValueNotifier<bool> isLocationEnabled = ValueNotifier(false);
   ValueNotifier<LatLng> markedPosition = ValueNotifier(null);
   ValueNotifier<String> markedPositionDisplayname = ValueNotifier(null);
-  @override
+  void checkGps()
+  {
+
+  }
   void checkPermissions() {
-    Permission.location.serviceStatus
-        .then((value) => isLocationEnabled.value = value.isEnabled);
-    Permission.location.status.then((value) {
+
+    isLocationServiceEnabled()
+        .then((value) {
+          print('location service status ${value}');
+
+          isLocationEnabled.value = value;
+        });
+
+    Permission.locationWhenInUse.status.then((value) {
       isLocationGranted.value = value.isGranted;
+      print('location permission ${value}');
       if (!value.isGranted) {
-        Permission.location.request().then((value) {
-          print(value);
+        Permission.locationWhenInUse.request().then((value) {
+          if(value.isUndetermined)
+            {
+              isLocationGranted.value=true;return;
+            }
           isLocationGranted.value = value.isGranted;
         });
       }
@@ -42,13 +55,13 @@ class AddAddressPage extends StatelessWidget {
       final GoogleMapController controller = await _controller.future;
       controller.animateCamera(CameraUpdate.newCameraPosition(camPos));
       markedPosition.value = camPos.target;
-      Geolocator()
-          .placemarkFromCoordinates(
+
+      placemarkFromCoordinates(
               camPos.target.latitude, camPos.target.longitude)
           .then((value) {
         if (value?.first != null) {
           markedPositionDisplayname.value =
-              '${value.first.country}, ${value.first.administrativeArea}, ${value.first.thoroughfare}\n ${AppLocalizations.of(context).translate('longitude')}: ${value.first.position.longitude} ${AppLocalizations.of(context).translate('latitude')}: ${value.first.position.latitude}';
+              '${value.first.country}, ${value.first.administrativeArea}, ${value.first.thoroughfare}';
         } else {
           markedPositionDisplayname.value = null;
         }
@@ -131,7 +144,7 @@ class AddAddressPage extends StatelessWidget {
                                             ),
                                             context);
                                       },
-                                      myLocationEnabled: value,
+                                      myLocationEnabled: true,
                                       mapType: MapType.hybrid,
                                       initialCameraPosition: CameraPosition(
                                         target: LatLng(41.638645, 42.987036),

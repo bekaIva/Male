@@ -474,7 +474,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                                   ),
                                 ),
                               ),
-                              Material(
+                             if(order.deliveryAddress.coordinates!=null&&order.deliveryAddress.coordinates.latitude!=null&&order.deliveryAddress.coordinates.longitude!=null) Material(
                                 elevation: 2,
                                 borderRadius: BorderRadius.circular(3),
                                 child: Padding(

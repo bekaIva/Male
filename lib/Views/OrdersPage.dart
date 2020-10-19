@@ -49,7 +49,9 @@ class _OrdersPageState extends State<OrdersPage> {
                                 .snapshots()
                                 .map<List<Order>>(
                                     (event) => event.docs.map((e) {
+print('aaaa');
                                           var order = Order.fromJson(e.data());
+                                          print(order.toString());
                                           order.documentId = e.id;
                                           return order;
                                         }).toList())

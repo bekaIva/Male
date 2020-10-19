@@ -7,8 +7,10 @@ class Coordinates {
   Coordinates({this.longitude, this.latitude});
 
   Coordinates.fromJson(Map<String, dynamic> json) {
-    latitude = json['latitude'] as double;
-    longitude = json['longitude'] as double;
+    if (json?.containsKey('latitude') ?? false)
+      latitude = json['latitude'] as double;
+    if (json?.containsKey('longitude') ?? false)
+      longitude = json['longitude'] as double;
   }
 
   Map<String, dynamic> toJson() {
@@ -59,7 +61,7 @@ class UserAddress {
       'isPrimary': isPrimary,
       'uid': uid,
       'name': name,
-      'coordinates': coordinates.toJson(),
+      'coordinates': coordinates?.toJson(),
       'address': address,
       'mobileNumber': mobileNumber,
     };

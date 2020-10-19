@@ -1,8 +1,9 @@
 import 'dart:async';
-import 'package:geolocator/geolocator.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:male/Constants/Constants.dart';
 import 'package:male/Localizations/app_localizations.dart';
@@ -22,28 +23,23 @@ class AddAddressPage extends StatelessWidget {
   ValueNotifier<bool> isLocationEnabled = ValueNotifier(false);
   ValueNotifier<LatLng> markedPosition = ValueNotifier(null);
   ValueNotifier<String> markedPositionDisplayname = ValueNotifier(null);
-  void checkGps()
-  {
-
-  }
+  void checkGps() {}
   void checkPermissions() {
+    isLocationServiceEnabled().then((value) {
+      print('location service status ${value}');
 
-    isLocationServiceEnabled()
-        .then((value) {
-          print('location service status ${value}');
-
-          isLocationEnabled.value = value;
-        });
+      isLocationEnabled.value = value;
+    });
 
     Permission.locationWhenInUse.status.then((value) {
       isLocationGranted.value = value.isGranted;
       print('location permission ${value}');
       if (!value.isGranted) {
         Permission.locationWhenInUse.request().then((value) {
-          if(value.isUndetermined)
-            {
-              isLocationGranted.value=true;return;
-            }
+          if (value.isUndetermined) {
+            isLocationGranted.value = true;
+            return;
+          }
           isLocationGranted.value = value.isGranted;
         });
       }
@@ -56,8 +52,7 @@ class AddAddressPage extends StatelessWidget {
       controller.animateCamera(CameraUpdate.newCameraPosition(camPos));
       markedPosition.value = camPos.target;
 
-      placemarkFromCoordinates(
-              camPos.target.latitude, camPos.target.longitude)
+      placemarkFromCoordinates(camPos.target.latitude, camPos.target.longitude)
           .then((value) {
         if (value?.first != null) {
           markedPositionDisplayname.value =
@@ -277,20 +272,18 @@ class AddAddressPage extends StatelessWidget {
                           throw MessageException(AppLocalizations.of(context)
                               .translate('Phone field is empty'));
                         }
-                        if (markedPosition.value == null) {
-                          throw MessageException(AppLocalizations.of(context)
-                              .translate(
-                                  'The delivery address is not selected on the map'));
-                        }
+
                         var userAddress = UserAddress(
-                            uid: user.uid,
-                            addressName: addressName,
-                            mobileNumber: phone,
-                            name: name,
-                            address: address,
-                            coordinates: Coordinates(
-                                latitude: markedPosition.value.latitude,
-                                longitude: markedPosition.value.longitude));
+                          uid: user.uid,
+                          addressName: addressName,
+                          mobileNumber: phone,
+                          name: name,
+                          address: address,
+                        );
+                        if (markedPosition.value != null)
+                          userAddress.coordinates = Coordinates(
+                              latitude: markedPosition.value.latitude,
+                              longitude: markedPosition.value.longitude);
                         Navigator.pop<UserAddress>(context, userAddress);
                       } on MessageException catch (e) {
                         showDialog(

@@ -168,5 +168,16 @@
   "Orders by users": "შეკვეთები მომხმარებლებით",
   "Total paid": "გადახდილი სრულად",
   "Addons": "დანამატები",
-  "Leave us a message": "დაგვიტოვე შეტყობინება"
+  "Leave us a message": "დაგვიტოვე შეტყობინება",
+  "Products total": "პროდუქტები სრულად",
+  "Clear": "გასუფთავება",
+  "Clear cart": "კალათის გასუფთავება",
+  "Are you sure you want to empty your cart?": "დარწმუნებული ხართ, რომ გსურთ კალათის გასუფთავება?",
+  "Are you sure you want to delete the category?": "დარწმუნებული ხართ, რომ გსურთ კატეგორიის წაშლა?",
+
+  "Delete category": "კატეგორიის წაშლა",
+  "Are you sure you want to delete the order?": "დარწმუნებული ხართ, რომ გსურთ შეკვეთის წაშლა?",
+  "Delete order": "შეკვეთის წაშლა",
+  "Are you sure you want to delete the product?": "დარწმუნებული ხართ, რომ გსურთ პროდუქტის წაშლა?",
+  "Delete product": "პროდუქტის წაშლა"
 }

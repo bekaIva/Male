@@ -257,31 +257,43 @@ class _OrdersPageState extends State<OrdersPage> {
                                   secondaryActions: [
                                     if (databaseUser?.role == UserType.admin)
                                       SlideAction(
-                                          onTap: () {
-                                            order.products.forEach((element) {
-                                              if (element.quantityInSupply !=
-                                                      null &&
-                                                  order
-                                                          .deliveryStatusSteps[
-                                                              DeliveryStatus
-                                                                  .Completed]
-                                                          .isActive ==
-                                                      false) {
-                                                FirebaseFirestore.instance
-                                                    .collection('products')
-                                                    .doc(element
-                                                        .productDocumentId)
-                                                    .update({
-                                                  'quantityInSupply':
-                                                      FieldValue.increment(
-                                                          element.quantity)
-                                                });
-                                              }
-                                            });
-                                            FirebaseFirestore.instance
-                                                .collection('orders')
-                                                .doc(order.documentId)
-                                                .delete();
+                                          onTap: () async {
+                                            var res = await showDialog<String>(
+                                              context: context,
+                                              builder: (context) => OkDialog(
+                                                  content:
+                                                      '${AppLocalizations.of(context).translate('Are you sure you want to delete the order?')} \n${AppLocalizations.of(context).translate('Order')}: ${order.orderId}',
+                                                  title: AppLocalizations.of(
+                                                          context)
+                                                      .translate(
+                                                          'Delete order')),
+                                            );
+                                            if (res == 'Ok') {
+                                              order.products.forEach((element) {
+                                                if (element.quantityInSupply !=
+                                                        null &&
+                                                    order
+                                                            .deliveryStatusSteps[
+                                                                DeliveryStatus
+                                                                    .Completed]
+                                                            .isActive ==
+                                                        false) {
+                                                  FirebaseFirestore.instance
+                                                      .collection('products')
+                                                      .doc(element
+                                                          .productDocumentId)
+                                                      .update({
+                                                    'quantityInSupply':
+                                                        FieldValue.increment(
+                                                            element.quantity)
+                                                  });
+                                                }
+                                              });
+                                              FirebaseFirestore.instance
+                                                  .collection('orders')
+                                                  .doc(order.documentId)
+                                                  .delete();
+                                            }
                                           },
                                           child: Padding(
                                             padding: const EdgeInsets.all(8.0),

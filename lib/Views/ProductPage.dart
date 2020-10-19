@@ -358,9 +358,22 @@ class _ProductPageState extends State<ProductPage> {
                                             ],
                                             secondaryActions: <Widget>[
                                               SlideAction(
-                                                onTap: () {
-                                                  viewModel.deleteProduct(
-                                                      products[index]);
+                                                onTap: () async {
+                                                  var res =
+                                                      await showDialog<String>(
+                                                    context: context,
+                                                    builder: (context) => OkDialog(
+                                                        content:
+                                                            '${AppLocalizations.of(context).translate('Are you sure you want to delete the product?')} \n${AppLocalizations.of(context).translate('Product')}: ${products[index].localizedName[AppLocalizations.of(context).locale.languageCode]}',
+                                                        title: AppLocalizations
+                                                                .of(context)
+                                                            .translate(
+                                                                'Delete product')),
+                                                  );
+                                                  if (res == 'Ok') {
+                                                    viewModel.deleteProduct(
+                                                        products[index]);
+                                                  }
                                                 },
                                                 child: Padding(
                                                   padding:

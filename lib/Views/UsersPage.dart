@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:male/Constants/Constants.dart';
 import 'package:male/Localizations/app_localizations.dart';
+import 'package:male/Models/ChatMessage.dart';
 import 'package:male/Models/User.dart';
 import 'package:male/ViewModels/MainViewModel.dart';
 import 'package:male/Views/UserPage.dart';
@@ -25,6 +26,49 @@ class _UsersPageState extends State<UsersPage> {
           body: ValueListenableBuilder(
             valueListenable: viewModel.users,
             builder: (context, value, child) {
+              viewModel.users.value.sort((user1, user2) {
+                var max1 = user1.messages.value.fold<ChatMessage>(null,
+                    (previousValue, element) {
+                  if (previousValue == null)
+                    return element;
+                  else {
+                    if (((previousValue?.serverTime as Timestamp ??
+                                    Timestamp.fromMillisecondsSinceEpoch(0))
+                                ?.compareTo(element?.serverTime as Timestamp ??
+                                    Timestamp.fromMillisecondsSinceEpoch(0)) ??
+                            0) >
+                        0) {
+                      return previousValue;
+                    } else {
+                      return element;
+                    }
+                  }
+                });
+
+                var max2 = user2.messages.value.fold<ChatMessage>(null,
+                    (previousValue, element) {
+                  if (previousValue == null)
+                    return element;
+                  else {
+                    if (((previousValue?.serverTime as Timestamp ??
+                                    Timestamp.fromMillisecondsSinceEpoch(0))
+                                ?.compareTo(element?.serverTime as Timestamp ??
+                                    Timestamp.fromMillisecondsSinceEpoch(0)) ??
+                            0) >
+                        0) {
+                      return previousValue;
+                    } else {
+                      return element;
+                    }
+                  }
+                });
+
+                return ((max2?.serverTime as Timestamp ??
+                            Timestamp.fromMillisecondsSinceEpoch(0))
+                        ?.compareTo(max1?.serverTime as Timestamp ??
+                            Timestamp.fromMillisecondsSinceEpoch(0)) ??
+                    -1);
+              });
               return ListView.builder(
                 itemCount: viewModel.users.value.length,
                 itemBuilder: (context, index) {

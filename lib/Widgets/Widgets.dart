@@ -94,12 +94,21 @@ class OkDialog extends StatelessWidget {
         FlatButton(
           splashColor: kPrimary.withOpacity(.2),
           child: Text(
+            AppLocalizations.of(context).translate('Cancel'),
+            style: TextStyle(color: kPrimary),
+          ),
+          onPressed: () {
+            Navigator.pop(context, 'Cancel');
+          },
+        ),
+        FlatButton(
+          splashColor: kPrimary.withOpacity(.2),
+          child: Text(
             AppLocalizations.of(context).translate('Ok'),
             style: TextStyle(color: kPrimary),
           ),
           onPressed: () {
-            Navigator.pop(
-                context, AppLocalizations.of(context).translate('Ok'));
+            Navigator.pop(context, 'Ok');
           },
         )
       ],
@@ -993,7 +1002,7 @@ class OrdersSummaryWidget extends StatelessWidget {
                             .translate('Total orders'))),
                         DataCell(Text((orders?.length ?? 0).toString())),
                         DataCell(Text(
-                          '${orders?.fold<double>(0, (previousValue, element) => previousValue + (element.products.fold<double>(0, (previousValue, element) => previousValue + element.totalProductPrice * (element.quantity ?? 1))) + element.deliveryFee)?.toStringAsFixed(0) ?? 0}₾',
+                          '${orders?.fold<double>(0, (previousValue, element) => previousValue + (element.products.fold<double>(0, (previousValue, element) => previousValue + element.totalProductPrice * (element.quantity ?? 1))) + element.deliveryFee)?.toStringAsFixed(2) ?? 0}₾',
                           style: TextStyle(fontFamily: 'Sans'),
                         )),
                       ]),
@@ -1009,7 +1018,7 @@ class OrdersSummaryWidget extends StatelessWidget {
                                 0)
                             .toString())),
                         DataCell(Text(
-                          '${orders?.where((element) => element.deliveryStatusSteps[DeliveryStatus.Completed].isActive)?.fold<double>(0, (previousValue, element) => previousValue + (element.products.fold<double>(0, (previousValue, element) => previousValue + element.totalProductPrice * (element.quantity ?? 1))) + element.deliveryFee)?.toStringAsFixed(0) ?? 0}₾',
+                          '${orders?.where((element) => element.deliveryStatusSteps[DeliveryStatus.Completed].isActive)?.fold<double>(0, (previousValue, element) => previousValue + (element.products.fold<double>(0, (previousValue, element) => previousValue + element.totalProductPrice * (element.quantity ?? 1))) + element.deliveryFee)?.toStringAsFixed(2) ?? 0}₾',
                           style: TextStyle(fontFamily: 'Sans'),
                         )),
                       ]),
@@ -1025,7 +1034,7 @@ class OrdersSummaryWidget extends StatelessWidget {
                                 0)
                             .toString())),
                         DataCell(Text(
-                          '${orders?.where((element) => element.deliveryStatusSteps[DeliveryStatus.Accepted].isActive)?.fold<double>(0, (previousValue, element) => previousValue + (element.products.fold<double>(0, (previousValue, element) => previousValue + element.totalProductPrice * (element.quantity ?? 1))) + element.deliveryFee)?.toStringAsFixed(0) ?? 0}₾',
+                          '${orders?.where((element) => element.deliveryStatusSteps[DeliveryStatus.Accepted].isActive)?.fold<double>(0, (previousValue, element) => previousValue + (element.products.fold<double>(0, (previousValue, element) => previousValue + element.totalProductPrice * (element.quantity ?? 1))) + element.deliveryFee)?.toStringAsFixed(2) ?? 0}₾',
                           style: TextStyle(fontFamily: 'Sans'),
                         )),
                       ]),
@@ -1041,7 +1050,7 @@ class OrdersSummaryWidget extends StatelessWidget {
                                 0)
                             .toString())),
                         DataCell(Text(
-                          '${orders?.where((element) => element.deliveryStatusSteps[DeliveryStatus.Pending].isActive)?.fold<double>(0, (previousValue, element) => previousValue + (element.products.fold<double>(0, (previousValue, element) => previousValue + element.totalProductPrice * (element.quantity ?? 1))) + element.deliveryFee)?.toStringAsFixed(0) ?? 0}₾',
+                          '${orders?.where((element) => element.deliveryStatusSteps[DeliveryStatus.Pending].isActive)?.fold<double>(0, (previousValue, element) => previousValue + (element.products.fold<double>(0, (previousValue, element) => previousValue + element.totalProductPrice * (element.quantity ?? 1))) + element.deliveryFee)?.toStringAsFixed(2) ?? 0}₾',
                           style: TextStyle(fontFamily: 'Sans'),
                         )),
                       ]),

@@ -207,10 +207,23 @@ class _CategoryPageState extends State<CategoryPage> {
                                           ],
                                           secondaryActions: <Widget>[
                                             SlideAction(
-                                              onTap: () {
-                                                viewModel.deleteCategory(
-                                                    viewModel.categories
-                                                        .value[index]);
+                                              onTap: () async {
+                                                var res =
+                                                    await showDialog<String>(
+                                                  context: context,
+                                                  builder: (context) => OkDialog(
+                                                      content:
+                                                          '${AppLocalizations.of(context).translate('Are you sure you want to delete the category?')} ${viewModel.categories.value[index].localizedName[AppLocalizations.of(context).locale.languageCode]}',
+                                                      title: AppLocalizations
+                                                              .of(context)
+                                                          .translate(
+                                                              'Delete category')),
+                                                );
+                                                if (res == 'Ok') {
+                                                  viewModel.deleteCategory(
+                                                      viewModel.categories
+                                                          .value[index]);
+                                                }
                                               },
                                               child: Padding(
                                                 padding:

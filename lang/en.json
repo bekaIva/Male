@@ -168,5 +168,15 @@
   "Orders by users": "Orders by users",
   "Total paid": "Total paid",
   "Addons": "Addons",
-  "Leave us a message": "Leave us a message"
+  "Leave us a message": "Leave us a message",
+  "Products total": "Products total",
+  "Clear": "Clear",
+  "Clear cart": "Clear cart",
+  "Are you sure you want to empty your cart?": "Are you sure you want to empty your cart?",
+  "Are you sure you want to delete the category?": "Are you sure you want to delete the category?",
+  "Delete category": "Delete category",
+  "Are you sure you want to delete the order?": "Are you sure you want to delete the order?",
+  "Delete order": "Delete order",
+  "Are you sure you want to delete the product?": "Are you sure you want to delete the product?",
+  "Delete product": "Delete product"
 }

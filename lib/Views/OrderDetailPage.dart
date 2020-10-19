@@ -141,284 +141,275 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                         ),
                       )
                       ,
-                      StreamBuilder<DocumentSnapshot>(
-                        stream: FirebaseFirestore.instance
-                            .collection('/users')
-                            .doc(order.uid)
-                            .snapshots(),
-                        builder: (context, snapshot) {
-                          if (snapshot.data != null) {
-                            DatabaseUser user = DatabaseUser.fromMap(snapshot.data.data());
-                            return ExpansionTile(
-                              title: Text(AppLocalizations.of(context)
-                                  .translate('User')),
-                              subtitle: Text(user.displayName ??
-                                  user.email ??
-                                  (user.isAnonymous
-                                      ? AppLocalizations.of(context)
-                                      .translate('Guest')
-                                      : AppLocalizations.of(context)
-                                      .translate('Unknown'))),
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Material(
-                                    type: MaterialType.transparency,
-                                    child: InkWell(
-                                      onTap: () {
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => UserPage(
-                                                user: user,
-                                              ),
-                                            ));
-                                      },
-                                      child: Column(
-                                        crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                        children: [
-                                          (user?.photoUrl?.length ?? 0) > 0
-                                              ? Container(
-                                            width: 100,
-                                            height: MediaQuery.of(context)
-                                                .size
-                                                .height /
-                                                4,
-                                            decoration: BoxDecoration(
-                                                image: DecorationImage(
-                                                    fit: BoxFit.cover,
-                                                    image: NetworkImage(
-                                                        user.photoUrl))),
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                  gradient: LinearGradient(
-                                                      colors: [
-                                                        Colors.black54,
-                                                        Colors.black54,
-                                                        Colors.transparent
-                                                      ],
-                                                      begin: Alignment
-                                                          .bottomCenter,
-                                                      end: Alignment
-                                                          .topCenter,
-                                                      stops: [
-                                                        0,
-                                                        .15,
-                                                        .5
-                                                      ])),
-                                              child: Container(
-                                                  padding:
-                                                  EdgeInsets.all(12),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                    CrossAxisAlignment
-                                                        .start,
-                                                    mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .end,
-                                                    children: [
-                                                      Text(
-                                                        user.displayName ??
-                                                            (user.isAnonymous
-                                                                ? AppLocalizations.of(
-                                                                context)
-                                                                .translate(
-                                                                'Guest')
-                                                                : ''),
-                                                        style: TextStyle(
-                                                            fontWeight:
-                                                            FontWeight
-                                                                .bold,
-                                                            color: kIcons,
-                                                            fontSize: 24),
-                                                      ),
-                                                      Text(
-                                                        user.email ?? '',
-                                                        style: TextStyle(
-                                                            color:
-                                                            kIcons),
-                                                      ),
-                                                    ],
-                                                  )),
+                      ValueListenableBuilder<List<DatabaseUser>>(valueListenable: viewModel.users,builder: (context, users, child) {
+                       var user = viewModel.users.value.firstWhere((element) => element.uid==order.uid,orElse: ()=>null);
+                      if(user!=null)
+                        {
+                          return ExpansionTile(
+                            title: Text(AppLocalizations.of(context)
+                                .translate('User')),
+                            subtitle: Text(user.displayName ??
+                                user.email ??
+                                (user.isAnonymous
+                                    ? AppLocalizations.of(context)
+                                    .translate('Guest')
+                                    : AppLocalizations.of(context)
+                                    .translate('Unknown'))),
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Material(
+                                  type: MaterialType.transparency,
+                                  child: InkWell(
+                                    onTap: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => UserPage(
+                                              user: user,
                                             ),
-                                          )
-                                              : Column(
-                                            children: [
-                                              Icon(
-                                                FontAwesome.user,
-                                                color:
-                                                Colors.grey.shade600,
-                                                size: 60,
-                                              ),
-                                              Text(user.displayName ??
-                                                  (user.isAnonymous
-                                                      ? AppLocalizations
-                                                      .of(context)
-                                                      .translate(
-                                                      'Guest')
-                                                      : '')),
-                                            ],
-                                          ),
-                                          Divider(
-                                            height: 30,
-                                          ),
-                                          Container(
-                                            padding: EdgeInsets.all(8),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                              children: [
-                                                Row(
+                                          ));
+                                    },
+                                    child: Column(
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                      children: [
+                                        (user?.photoUrl?.length ?? 0) > 0
+                                            ? Container(
+                                          width: 100,
+                                          height: MediaQuery.of(context)
+                                              .size
+                                              .height /
+                                              4,
+                                          decoration: BoxDecoration(
+                                              image: DecorationImage(
+                                                  fit: BoxFit.cover,
+                                                  image: NetworkImage(
+                                                      user.photoUrl))),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                                gradient: LinearGradient(
+                                                    colors: [
+                                                      Colors.black54,
+                                                      Colors.black54,
+                                                      Colors.transparent
+                                                    ],
+                                                    begin: Alignment
+                                                        .bottomCenter,
+                                                    end: Alignment
+                                                        .topCenter,
+                                                    stops: [
+                                                      0,
+                                                      .15,
+                                                      .5
+                                                    ])),
+                                            child: Container(
+                                                padding:
+                                                EdgeInsets.all(12),
+                                                child: Column(
                                                   crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
+                                                  CrossAxisAlignment
+                                                      .start,
+                                                  mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .end,
                                                   children: [
-                                                    Icon(
-                                                      Icons.info_outline,
-                                                      color:
-                                                      Colors.grey.shade600,
+                                                    Text(
+                                                      user.displayName ??
+                                                          (user.isAnonymous
+                                                              ? AppLocalizations.of(
+                                                              context)
+                                                              .translate(
+                                                              'Guest')
+                                                              : ''),
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                          FontWeight
+                                                              .bold,
+                                                          color: kIcons,
+                                                          fontSize: 24),
                                                     ),
-                                                    SizedBox(
-                                                      width: 20,
-                                                    ),
-                                                    Flexible(
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                        children: [
-                                                          Text(
-                                                            AppLocalizations.of(
-                                                                context)
-                                                                .translate(
-                                                                'User info'),
-                                                            style: TextStyle(
-                                                                color: Colors
-                                                                    .grey
-                                                                    .shade700),
-                                                          ),
-                                                          Divider(),
-                                                          Row(
-                                                            mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                            crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .center,
-                                                            children: [
-                                                              Text(AppLocalizations
-                                                                  .of(
-                                                                  context)
-                                                                  .translate(
-                                                                  'User type')),
-                                                              Text(AppLocalizations
-                                                                  .of(
-                                                                  context)
-                                                                  .translate(EnumToString
-                                                                  .parse(user
-                                                                  .role)))
-                                                            ],
-                                                          ),
-                                                          Divider(),
-                                                          Row(
-                                                            mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                            crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .center,
-                                                            children: [
-                                                              Text(AppLocalizations
-                                                                  .of(
-                                                                  context)
-                                                                  .translate(
-                                                                  'User name')),
-                                                              Text(user
-                                                                  .displayName ??
-                                                                  (user.isAnonymous
-                                                                      ? AppLocalizations.of(
-                                                                      context)
-                                                                      .translate(
-                                                                      'Guest')
-                                                                      : '')),
-                                                            ],
-                                                          ),
-                                                          Divider(),
-                                                          Row(
-                                                            mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                            crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .center,
-                                                            children: [
-                                                              Text(AppLocalizations
-                                                                  .of(
-                                                                  context)
-                                                                  .translate(
-                                                                  'E-mail')),
-                                                              SelectableText(
-                                                                  user.email ??
-                                                                      ''),
-                                                            ],
-                                                          ),
-                                                          Divider(),
-                                                          Row(
-                                                            mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                            crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .center,
-                                                            children: [
-                                                              Text(AppLocalizations
-                                                                  .of(
-                                                                  context)
-                                                                  .translate(
-                                                                  'Phone')),
-                                                              SelectableText(
-                                                                user.phoneNumber ??
-                                                                    '',
-                                                                onTap:
-                                                                    () async {
-                                                                  if (await canLaunch(
-                                                                      'tel:${user.phoneNumber}')) {
-                                                                    launch(
-                                                                        'tel:${user.phoneNumber}');
-                                                                  }
-                                                                },
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ],
-                                                      ),
+                                                    Text(
+                                                      user.email ?? '',
+                                                      style: TextStyle(
+                                                          color:
+                                                          kIcons),
                                                     ),
                                                   ],
-                                                ),
-                                                Divider(),
-                                              ],
-                                            ),
+                                                )),
                                           ),
-                                        ],
-                                      ),
+                                        )
+                                            : Column(
+                                          children: [
+                                            Icon(
+                                              FontAwesome.user,
+                                              color:
+                                              Colors.grey.shade600,
+                                              size: 60,
+                                            ),
+                                            Text(user.displayName ??
+                                                (user.isAnonymous
+                                                    ? AppLocalizations
+                                                    .of(context)
+                                                    .translate(
+                                                    'Guest')
+                                                    : '')),
+                                          ],
+                                        ),
+                                        Divider(
+                                          height: 30,
+                                        ),
+                                        Container(
+                                          padding: EdgeInsets.all(8),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                                children: [
+                                                  Icon(
+                                                    Icons.info_outline,
+                                                    color:
+                                                    Colors.grey.shade600,
+                                                  ),
+                                                  SizedBox(
+                                                    width: 20,
+                                                  ),
+                                                  Flexible(
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                      CrossAxisAlignment
+                                                          .start,
+                                                      children: [
+                                                        Text(
+                                                          AppLocalizations.of(
+                                                              context)
+                                                              .translate(
+                                                              'User info'),
+                                                          style: TextStyle(
+                                                              color: Colors
+                                                                  .grey
+                                                                  .shade700),
+                                                        ),
+                                                        Divider(),
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                          crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .center,
+                                                          children: [
+                                                            Text(AppLocalizations
+                                                                .of(
+                                                                context)
+                                                                .translate(
+                                                                'User type')),
+                                                            Text(AppLocalizations
+                                                                .of(
+                                                                context)
+                                                                .translate(EnumToString
+                                                                .parse(user
+                                                                .role)))
+                                                          ],
+                                                        ),
+                                                        Divider(),
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                          crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .center,
+                                                          children: [
+                                                            Text(AppLocalizations
+                                                                .of(
+                                                                context)
+                                                                .translate(
+                                                                'User name')),
+                                                            Text(user
+                                                                .displayName ??
+                                                                (user.isAnonymous
+                                                                    ? AppLocalizations.of(
+                                                                    context)
+                                                                    .translate(
+                                                                    'Guest')
+                                                                    : '')),
+                                                          ],
+                                                        ),
+                                                        Divider(),
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                          crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .center,
+                                                          children: [
+                                                            Text(AppLocalizations
+                                                                .of(
+                                                                context)
+                                                                .translate(
+                                                                'E-mail')),
+                                                            SelectableText(
+                                                                user.email ??
+                                                                    ''),
+                                                          ],
+                                                        ),
+                                                        Divider(),
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                          crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .center,
+                                                          children: [
+                                                            Text(AppLocalizations
+                                                                .of(
+                                                                context)
+                                                                .translate(
+                                                                'Phone')),
+                                                            SelectableText(
+                                                              user.phoneNumber ??
+                                                                  '',
+                                                              onTap:
+                                                                  () async {
+                                                                if (await canLaunch(
+                                                                    'tel:${user.phoneNumber}')) {
+                                                                  launch(
+                                                                      'tel:${user.phoneNumber}');
+                                                                }
+                                                              },
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              Divider(),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                )
-                              ],
-                            );
-                          } else {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return Center(
-                                child: CircularProgressIndicator(
-                                  valueColor: AlwaysStoppedAnimation(kPrimary),
                                 ),
-                              );
-                            } else
-                              return SizedBox();
-                          }
-                        },
-                      ),
+                              )
+                            ],
+                          );
+                        }
+                      else return child;
+                       },child: Center(
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation(kPrimary),
+                        ),
+                      ),),
+
                       ExpansionTile(
                         title: Text(AppLocalizations.of(context)
                             .translate('Delivery address')),
@@ -1008,10 +999,21 @@ class OrderedProductWidget extends StatelessWidget {
               ],),
 
 
-              Align(alignment: Alignment.centerRight,
-                child: Text(
-                  '₾${product.totalProductPrice.toString()}',
-                  style: kPriceTextStyle,
+              Text(
+                '₾${product.totalProductPrice.toString()}',
+                style: kPriceTextStyle,
+              ),
+              Divider(),
+
+              Align(alignment: Alignment.center,
+                child: Column(mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('${AppLocalizations.of(context).translate('Total')}(${product.quantity}x)',style: TextStyle(fontFamily: 'Sans'),),
+                    Text(
+                      '₾${(product.totalProductPrice*product.quantity).toStringAsFixed(2)}',
+                      style: TextStyle(color: kPrimary, fontFamily: 'Sans'),
+                    ),
+                  ],
                 ),
               ),
             ],

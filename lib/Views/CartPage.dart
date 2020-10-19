@@ -109,6 +109,30 @@ class _CartPageState extends State<CartPage> {
                                               p: e,
                                             ))
                                         .toList(),
+                                    if (cart.length > 0)
+                                      FlatButton(
+                                        child: Text(AppLocalizations.of(context)
+                                            .translate('Clear')),
+                                        onPressed: () async {
+                                          var res = await showDialog<String>(
+                                            context: context,
+                                            builder: (context) => OkDialog(
+                                                content:
+                                                    '${AppLocalizations.of(context).translate('Are you sure you want to empty your cart?')}',
+                                                title: AppLocalizations.of(
+                                                        context)
+                                                    .translate('Clear cart')),
+                                          );
+                                          if (res == 'Ok') {
+                                            cart.forEach((element) {
+                                              FirebaseFirestore.instance
+                                                  .collection('/cart')
+                                                  .doc(element.documentId)
+                                                  .delete();
+                                            });
+                                          }
+                                        },
+                                      )
                                   ],
                                 ),
                               ),

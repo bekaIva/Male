@@ -17,8 +17,7 @@ class CategoryWidget extends StatelessWidget {
       padding:
           const EdgeInsets.only(left: 10.0, right: 10.0, top: 8.0, bottom: 5.0),
       child: Container(
-
-        height: MediaQuery.of(context).size.width/3,
+        height: MediaQuery.of(context).size.width / 2.2,
         decoration: BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(15.0))),
         child: Material(

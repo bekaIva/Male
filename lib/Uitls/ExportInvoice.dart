@@ -531,10 +531,10 @@ class Invoice {
                   return getLocalizedName(
                       products[row].localizedName, bContext);
                 case 1:
-                  return '${getLocalizedName(products[row].localizedDescription, bContext)}'
-                      ' ${products[row].addonDescriptions?.fold('', (previousValue, element) => previousValue + '${getLocalizedName(element.localizedAddonDescriptionName, bContext)}: '
-                          '${getLocalizedName(element.localizedAddonDescription, bContext)}')}'
-                      '${products[row].checkedAddon?.localizedName != null ? '\n' + getLocalizedName(products[row].checkedAddon?.localizedName, bContext) : ''} ${products[row].checkedAddon?.price != null ? ' +${products[row].checkedAddon?.price}₾' : ''} \n${products[row].selectedSelectableAddons?.fold('', (previousValue, element) => previousValue + getLocalizedName(element.localizedName, bContext) + '${element?.price != null ? ' +${element.price}₾' : ''}\n') ?? ''}';
+                  // '${getLocalizedName(products[row].localizedDescription, bContext)}'
+                  //     ' ${products[row].addonDescriptions?.fold('', (previousValue, element) => previousValue + '${getLocalizedName(element.localizedAddonDescriptionName, bContext)}: '
+                  //     '${getLocalizedName(element.localizedAddonDescription, bContext)}')}'
+                  return '${products[row].checkedAddon?.localizedName != null ? '\n' + getLocalizedName(products[row].checkedAddon?.localizedName, bContext) : ''} ${products[row].checkedAddon?.price != null ? ' +${products[row].checkedAddon?.price}₾' : ''} \n${products[row].selectedSelectableAddons?.fold('', (previousValue, element) => previousValue + getLocalizedName(element.localizedName, bContext) + '${element?.price != null ? ' +${element.price}₾' : ''}\n') ?? ''}';
                 case 2:
                   return (products[row].quantity ?? 1).toString();
                 case 3:

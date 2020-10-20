@@ -461,11 +461,13 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                                           children: [
                                             Text(AppLocalizations.of(context)
                                                 .translate('Address')),
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  left: 24),
-                                              child: Text(order
-                                                  .deliveryAddress.address),
+                                            Expanded(
+                                              child: Padding(
+                                                padding: const EdgeInsets.only(
+                                                    left: 24),
+                                                child: Text(order
+                                                    .deliveryAddress.address),
+                                              ),
                                             ),
                                           ],
                                         )
